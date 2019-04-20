@@ -1,16 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.Group?>
+<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Hyperlink?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.effect.Glow?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.Pane?>
+<?import javafx.scene.paint.LinearGradient?>
+<?import javafx.scene.paint.Stop?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="576.0" prefWidth="1024.0" style="-fx-background-color: linear-gradient(#000000, #434343); -fx-background-radius: 3 3 3 3;" BorderPane.alignment="CENTER" xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1">
+<AnchorPane prefHeight="576.0" prefWidth="1024.0" style="-fx-background-color: linear-gradient(#200122, #200122,#3F0D12); -fx-background-radius: 3 3 3 3;" BorderPane.alignment="CENTER" xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1">
    <children>
       <Pane prefHeight="576.0" prefWidth="427.0" style="-fx-background-color: linear-gradient(#000000,#000000,#3F0D12); -fx-background-radius: 3 0 0 3;">
          <children>
@@ -63,5 +68,55 @@
             </Label>
          </children>
       </Pane>
+      <Group layoutX="421.0" layoutY="51.0">
+         <children>
+            <Label prefHeight="41.0" prefWidth="389.0" style="-fx-background-color: linear-gradient(to right, #000000, #200122);" />
+            <Label layoutX="20.0" layoutY="8.0" text="Directories">
+               <textFill>
+                  <LinearGradient endX="1.0" endY="1.0">
+                     <stops>
+                        <Stop color="WHITE" />
+                        <Stop color="#ffafbf" offset="1.0" />
+                     </stops>
+                  </LinearGradient>
+               </textFill>
+               <font>
+                  <Font name="Corbel" size="21.0" />
+               </font>
+            </Label>
+         </children>
+      </Group>
+      <Group layoutX="441.0" layoutY="110.0">
+         <children>
+            <Label layoutY="1.0" prefHeight="23.0" prefWidth="155.0" text="Lina Engine Source:" textFill="#ffe7ec">
+               <font>
+                  <Font name="Corbel" size="14.0" />
+               </font>
+            </Label>
+            <TextField layoutX="127.0" prefHeight="25.0" prefWidth="303.0" />
+            <Label layoutX="127.0" layoutY="36.0" prefHeight="23.0" prefWidth="303.0" text="( where Lina Engine's source repository is located.)" textFill="#ffe7ec">
+               <font>
+                  <Font name="Corbel" size="11.0" />
+               </font>
+            </Label>
+            <Button layoutX="455.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="73.0" text="Locate" />
+         </children>
+      </Group>
+      <Group layoutX="441.0" layoutY="189.0">
+         <children>
+            <Label layoutY="1.0" prefHeight="23.0" prefWidth="155.0" text="Build Directory:" textFill="#ffe7ec">
+               <font>
+                  <Font name="Corbel" size="14.0" />
+               </font>
+            </Label>
+            <TextField layoutX="127.0" prefHeight="25.0" prefWidth="303.0" />
+            <Label layoutX="127.0" layoutY="36.0" prefHeight="23.0" prefWidth="303.0" text="( where to generate the project files )" textFill="#ffe7ec">
+               <font>
+                  <Font name="Corbel" size="11.0" />
+               </font>
+            </Label>
+            <Button layoutX="455.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="73.0" text="Locate" />
+         </children>
+      </Group>
    </children>
 </AnchorPane>
