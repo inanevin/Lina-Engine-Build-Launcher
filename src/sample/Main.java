@@ -68,6 +68,7 @@ public class Main extends Application {
 
              Scene scene = new Scene(root, 1024, 576);
              scene.setFill(Color.TRANSPARENT);
+
             primaryStage.setTitle("Lina Engine Build Launcher");
             primaryStage.setScene(scene);
             primaryStage.setResizable(false);
