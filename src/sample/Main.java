@@ -3,6 +3,8 @@ package sample;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Rectangle2D;
@@ -10,11 +12,13 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 
 import javafx.scene.control.*;
+import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Screen;
@@ -24,6 +28,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 
 import javafx.scene.layout.HBox;
+import javafx.util.Callback;
 
 import javax.xml.soap.Text;
 import java.util.Timer;
@@ -66,23 +71,31 @@ class DisableDynamicLogo extends TimerTask {
 
 }
 
-class TableRowBase
+
+class TableRowString
 {
-    TableRowBase(String id) { m_ID = id; }
+    TableRowString() {};
+    TableRowString(String id, String data) { m_Data = data; m_ID = id;};
 
-    public String GetID(){ return m_ID; }
+    public String getValue() { return m_Data; }
+    public String getOption() { return m_ID; }
 
+    private String m_Data;
     private String m_ID;
 }
-class TableRow<T> extends TableRowBase
+
+class TableRowBool
 {
-    TableRow(String id, T data) { super(id); m_Data = data;}
+    TableRowBool() {};
+    TableRowBool(String id, Boolean data) { m_Data = data; m_ID = id;};
 
-    public T GetData() { return m_Data; }
-    public void SetData(T data) { m_Data = data;}
+    public Boolean getValue() { return m_Data; }
+    public String getOption() { return m_ID; }
 
-    private T m_Data;
+    private Boolean m_Data;
+    private String m_ID;
 }
+
 
 
 
@@ -182,7 +195,7 @@ public class Main extends Application {
         logoDynamic = (ImageView) scene.lookup("#logoDynamic");
         logoStatic = (ImageView) scene.lookup("#logoStatic");
         generatorBox = (ComboBox<String>) scene.lookup("#generatorComboBox");
-        optionsTable = (TableView) scene.lookup("#optionsTable");
+        optionsTable = (TableView<BuildOption>) scene.lookup("#optionsTable");
         sourceField = (TextField) scene.lookup("#sourceField");
         buildField = (TextField) scene.lookup("#buildField");
 
@@ -195,20 +208,27 @@ public class Main extends Application {
             }
         });
 
+        BuildOption<String> option1 = new BuildOption<>("CMAKE_CONFIGURATION_TYPES","Debug;Release;MinSizeRel;RelWithDebInfo;" );
+        BuildOption<Boolean> option2 = new BuildOption<>("LINA_BUILD_SANDBOX",true );
+        BuildOption<Boolean> option3 = new BuildOption<>("LINA_ENABLE_LOGGING",true );
+
+        final ObservableList<BuildOption<?>> data = FXCollections.observableArrayList(option1, option2, option3);
+
+        final TableColumn<BuildOption<?>, String> nameColumn = new TableColumn<>( "Option" );
+        nameColumn.setCellValueFactory( new PropertyValueFactory<>( "firstName" ));
+
+        TableColumn<BuildOption<?>, ?> particularValueCol = new TableColumn<>("Value");
+        particularValueCol.setCellValueFactory(new PropertyValueFactory<>("particularValue"));
 
 
+       optionsTable.setItems(data);
+       optionsTable.getColumns().addAll(nameColumn, particularValueCol);
+       SystemOutTableViewSelectedCell.set(optionsTable);
 
-        TableColumn<String, TableRowBase> column1 = new TableColumn("Option");
-        column1.setCellValueFactory(new PropertyValueFactory<>("Option"));
-
-
-        TableColumn<String, TableRowBase> column2 = new TableColumn("Value");
-        column1.setCellValueFactory(new PropertyValueFactory<>("Value"));
-
-        optionsTable.getItems().add(new TableRow<Boolean>("BUILD_SHARED_LIBS", false));
-        optionsTable.getItems().add(new TableRow<String>("CMAKE_CONFIGURATION_TYPES", "Debug;Release;MinSizeRel;RelWithDebInfo;"));
-        optionsTable.getItems().add(new TableRow<Boolean>("LINA_BUILD_SANDBOX", true));
-        optionsTable.getItems().add(new TableRow<Boolean>("LINA_ENABLE_LOGGING", true));
+       //optionsTable.getItems().add(new OptionRowBool("BUILD_SHARED_LIBS", false));
+      //  optionsTable.getItems().add(new TableRowBool"CMAKE_CONFIGURATION_TYPES", "Debug;Release;MinSizeRel;RelWithDebInfo;"));
+        //optionsTable.getItems().add(new OptionRowBool("LINA_BUILD_SANDBOX", true));
+        //optionsTable.getItems().add(new OptionRowBool("LINA_ENABLE_LOGGING", true));
 
 
 
