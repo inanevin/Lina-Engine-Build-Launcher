@@ -1,38 +1,34 @@
 package sample;
 
 import javafx.application.Application;
-import javafx.application.Platform;
+
 import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
+
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.Rectangle2D;
+
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 
 import javafx.scene.control.*;
-import javafx.scene.control.cell.CheckBoxTableCell;
-import javafx.scene.control.cell.PropertyValueFactory;
+
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
+
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
-import javafx.stage.Screen;
+
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 
-import javafx.scene.layout.HBox;
 import javafx.util.Callback;
+import javafx.util.Pair;
 
-import javax.xml.soap.Text;
+
 import java.util.Timer;
 import java.util.TimerTask;
+import javafx.util.Pair;
 
 
 class EnableDynamicLogo extends TimerTask {
@@ -109,7 +105,11 @@ public class Main extends Application {
     private int logoChangeRate = 5;
     TextField sourceField, buildField;
     ComboBox<String> generatorBox;
-    TableView optionsTable;
+    TableView<Pair<String, Object>> optionsTable = new TableView<>();
+
+    private Pair<String, Object> pair(String name, Object value) {
+        return new Pair<>(name, value);
+    }
 
     String generators[] =
             {
@@ -195,7 +195,7 @@ public class Main extends Application {
         logoDynamic = (ImageView) scene.lookup("#logoDynamic");
         logoStatic = (ImageView) scene.lookup("#logoStatic");
         generatorBox = (ComboBox<String>) scene.lookup("#generatorComboBox");
-        optionsTable = (TableView<BuildOption>) scene.lookup("#optionsTable");
+        optionsTable = (TableView) scene.lookup("#optionsTable");
         sourceField = (TextField) scene.lookup("#sourceField");
         buildField = (TextField) scene.lookup("#buildField");
 
@@ -208,27 +208,46 @@ public class Main extends Application {
             }
         });
 
-        BuildOption<String> option1 = new BuildOption<>("CMAKE_CONFIGURATION_TYPES","Debug;Release;MinSizeRel;RelWithDebInfo;" );
+        ObservableList<Pair<String, Object>> data = FXCollections.observableArrayList(
+                pair("CMAKE_CONFIGURATION_TYPES","Debug;Release;MinSizeRel;RelWithDebInfo;"),
+                pair("LINA_BUILD_SANDBOX",true),
+                pair("LINA_ENABLE_LOGGING",true )
+        );
+
+        optionsTable.getItems().setAll(data);
+
+        TableColumn<Pair<String, Object>, String> nameColumn = new TableColumn<>("OPTION");
+        nameColumn.setPrefWidth(100);
+        TableColumn<Pair<String, Object>, Object> valueColumn = new TableColumn<>("VALUE");
+        valueColumn.setSortable(false);
+        valueColumn.setPrefWidth(150);
+
+        nameColumn.setCellValueFactory(new PairKeyFactory());
+        valueColumn.setCellValueFactory(new PairValueFactory());
+
+        optionsTable.getColumns().setAll(nameColumn, valueColumn);
+        valueColumn.setCellFactory(new Callback<TableColumn<Pair<String, Object>, Object>, TableCell<Pair<String, Object>, Object>>() {
+            @Override
+            public TableCell<Pair<String, Object>, Object> call(TableColumn<Pair<String, Object>, Object> column) {
+                return new PairValueCell();
+            }
+        });
+      /*  BuildOption<String> option1 = new BuildOption<>("CMAKE_CONFIGURATION_TYPES","Debug;Release;MinSizeRel;RelWithDebInfo;" );
         BuildOption<Boolean> option2 = new BuildOption<>("LINA_BUILD_SANDBOX",true );
         BuildOption<Boolean> option3 = new BuildOption<>("LINA_ENABLE_LOGGING",true );
 
         final ObservableList<BuildOption<?>> data = FXCollections.observableArrayList(option1, option2, option3);
 
-        final TableColumn<BuildOption<?>, String> nameColumn = new TableColumn<>( "Option" );
+        final TableColumn<String, BuildOption<?>> nameColumn = new TableColumn<>( "Option" );
         nameColumn.setCellValueFactory( new PropertyValueFactory<>( "firstName" ));
 
-        TableColumn<BuildOption<?>, ?> particularValueCol = new TableColumn<>("Value");
+        TableColumn<String, BuildOption<?>> particularValueCol = new TableColumn<>("Value");
         particularValueCol.setCellValueFactory(new PropertyValueFactory<>("particularValue"));
+        particularValueCol.setCel
 
 
        optionsTable.setItems(data);
-       optionsTable.getColumns().addAll(nameColumn, particularValueCol);
-       SystemOutTableViewSelectedCell.set(optionsTable);
-
-       //optionsTable.getItems().add(new OptionRowBool("BUILD_SHARED_LIBS", false));
-      //  optionsTable.getItems().add(new TableRowBool"CMAKE_CONFIGURATION_TYPES", "Debug;Release;MinSizeRel;RelWithDebInfo;"));
-        //optionsTable.getItems().add(new OptionRowBool("LINA_BUILD_SANDBOX", true));
-        //optionsTable.getItems().add(new OptionRowBool("LINA_ENABLE_LOGGING", true));
+       optionsTable.getColumns().addAll(nameColumn, particularValueCol);*/
 
 
 
