@@ -18,6 +18,7 @@ import javafx.scene.input.MouseEvent;
 
 import javafx.scene.paint.Color;
 
+import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.event.ActionEvent;
@@ -26,9 +27,9 @@ import javafx.util.Callback;
 import javafx.util.Pair;
 
 
+import java.io.*;
 import java.util.Timer;
 import java.util.TimerTask;
-import javafx.util.Pair;
 
 
 class EnableDynamicLogo extends TimerTask {
@@ -97,15 +98,21 @@ class TableRowBool
 
 public class Main extends Application {
 
-    private double xOffset = 0;
-    private double yOffset = 0;
-    ImageView logoDynamic;
-    ImageView logoStatic;
-    Timer logoTimer;
+    private double sceneXOffset;
+    private double sceneYOffset;
     private int logoChangeRate = 5;
-    TextField sourceField, buildField;
-    ComboBox<String> generatorBox;
-    TableView<Pair<String, Object>> optionsTable = new TableView<>();
+    private String sourceDirectoryIdentifier = "#linaenginebuildlauncherentrypointv100";
+
+    private ImageView logoDynamic;
+    private ImageView logoStatic;
+    private Timer logoTimer;
+    private TextField sourceField, buildField;
+    private ComboBox<String> generatorBox;
+    private TableView<Pair<String, Object>> optionsTable = new TableView<>();
+    private Button generateButton;
+    private Button generateAndBuildButton;
+    private Button locateSourceButton;
+    private Button locateBuildButton;
 
     private Pair<String, Object> pair(String name, Object value) {
         return new Pair<>(name, value);
@@ -174,23 +181,24 @@ public class Main extends Application {
         root.setOnMousePressed(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
-                xOffset = event.getSceneX();
-                yOffset = event.getSceneY();
+                sceneXOffset = event.getSceneX();
+                sceneYOffset = event.getSceneY();
             }
         });
 
         root.setOnMouseDragged(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
-                primaryStage.setX(event.getScreenX() - xOffset);
-                primaryStage.setY(event.getScreenY() - yOffset);
+                primaryStage.setX(event.getScreenX() - sceneXOffset);
+                primaryStage.setY(event.getScreenY() - sceneYOffset);
             }
         });
 
 
         Scene scene = new Scene(root, 1024, 576);
         scene.setFill(Color.TRANSPARENT);
-        Hyperlink hyperLink = (Hyperlink) scene.lookup("#hyperlink");
+        Hyperlink githubHyperlink = (Hyperlink) scene.lookup("#githubHyperlink");
+        Hyperlink inanevinHyperlink = (Hyperlink) scene.lookup("#inanevinHyperlink");
 
         logoDynamic = (ImageView) scene.lookup("#logoDynamic");
         logoStatic = (ImageView) scene.lookup("#logoStatic");
@@ -198,13 +206,62 @@ public class Main extends Application {
         optionsTable = (TableView) scene.lookup("#optionsTable");
         sourceField = (TextField) scene.lookup("#sourceField");
         buildField = (TextField) scene.lookup("#buildField");
+        generateButton = (Button) scene.lookup("#generateButton");
+        generateAndBuildButton = (Button)scene.lookup("#generateAndBuildButton");
+        locateSourceButton = (Button) scene.lookup("#locateSourceButton");
+        locateBuildButton = (Button) scene.lookup("#locateBuildButton");
+
+        generateButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+
+                GenerateProjectFiles(false);
+
+            }
+        });
+
+        generateAndBuildButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                GenerateProjectFiles(true);
+            }
+        });
+
+        locateSourceButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                DirectoryChooser directoryChooser = new DirectoryChooser();
+                File selectedDirectory = directoryChooser.showDialog(primaryStage);
+
+                if(selectedDirectory != null)
+                    sourceField.setText(selectedDirectory.getAbsolutePath());
+            }
+        });
+
+        locateBuildButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                DirectoryChooser directoryChooser = new DirectoryChooser();
+                File selectedDirectory = directoryChooser.showDialog(primaryStage);
+
+                if(selectedDirectory != null)
+                    buildField.setText(selectedDirectory.getAbsolutePath());
+            }
+        });
 
         generatorBox.setItems(FXCollections.observableArrayList(generators));
-
-        hyperLink.setOnAction(new EventHandler<ActionEvent>() {
+        generatorBox.setValue(generators[0]);
+        githubHyperlink.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
                 getHostServices().showDocument("https://github.com/inanevin/LinaEngine");
+            }
+        });
+
+        inanevinHyperlink.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                getHostServices().showDocument("https://inanevin.com");
             }
         });
 
@@ -218,6 +275,7 @@ public class Main extends Application {
 
         TableColumn<Pair<String, Object>, String> nameColumn = new TableColumn<>("OPTION");
         nameColumn.setPrefWidth(100);
+
         TableColumn<Pair<String, Object>, Object> valueColumn = new TableColumn<>("VALUE");
         valueColumn.setSortable(false);
         valueColumn.setPrefWidth(150);
@@ -260,6 +318,66 @@ public class Main extends Application {
         primaryStage.show();
 
         logoTimer.scheduleAtFixedRate(new EnableDynamicLogo(logoStatic, logoDynamic, logoTimer), logoChangeRate * 1000, logoChangeRate * 1000);
+    }
+
+    void GenerateProjectFiles(boolean buildAsWell)
+    {
+        if(!IsSourceDirectoryValid().equals(""))
+        {
+
+            return;
+        }
+
+        if(!buildAsWell)
+        {
+
+        }
+        else
+        {
+
+        }
+    }
+
+    String IsSourceDirectoryValid()
+    {
+        File dir = new File(sourceField.getText());
+
+        File[] matches = dir.listFiles(new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String name) {
+                return name.startsWith("CMakeLists") && name.endsWith(".txt");
+            }
+        });
+
+        if(matches.length == 0)
+            return "CMakeLists.txt could not be found in the source directory. Please make sure you select the root folder of Lina Engine source directory.";
+
+        File cmakeFile = matches[0];
+
+        try
+        {
+            BufferedReader reader = new BufferedReader(new FileReader(cmakeFile));
+            String text = reader.readLine();
+
+            if(text.equals(sourceDirectoryIdentifier))
+            {
+                // Correct dir.
+                return "";
+            }
+            else
+            {
+                return "CMakeLists file in the source directory looks corrupted. Please make sure it includes the source directory identifier in the first line.";
+            }
+        }
+        catch(FileNotFoundException e)
+        {
+            return e.getMessage();
+        }
+        catch(IOException e)
+        {
+            return e.getMessage();
+        }
+
     }
 
 

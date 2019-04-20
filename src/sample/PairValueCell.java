@@ -5,6 +5,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TextField;
 import javafx.util.Callback;
 import javafx.util.Pair;
 
@@ -33,8 +34,10 @@ class PairValueCell extends TableCell<Pair<String, Object>, Object> {
 
         if (item != null) {
             if (item instanceof String) {
-                setText((String) item);
-                setGraphic(null);
+                TextField textField = new TextField();
+                textField.setText((String)item);
+                //setText((String) item);
+                setGraphic(textField);
             } else if (item instanceof Integer) {
                 setText(Integer.toString((Integer) item));
                 setGraphic(null);
