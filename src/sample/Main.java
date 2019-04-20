@@ -1,40 +1,30 @@
 package sample;
 
 import javafx.application.Application;
-
 import javafx.collections.FXCollections;
-
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
-
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-
 import javafx.scene.control.*;
-
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
-
 import javafx.scene.paint.Color;
-
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.event.ActionEvent;
-
 import javafx.util.Callback;
 import javafx.util.Pair;
 
-
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.*;
 
 
-class EnableDynamicLogo extends TimerTask {
+class EnableDynamicLogo extends TimerTask
+{
     EnableDynamicLogo(ImageView staticView, ImageView dynamicView, Timer target) {
         staticImage = staticView;
         dynamicImage = dynamicView;
@@ -53,7 +43,8 @@ class EnableDynamicLogo extends TimerTask {
     Timer targetTimer;
 }
 
-class DisableDynamicLogo extends TimerTask {
+class DisableDynamicLogo extends TimerTask
+{
     DisableDynamicLogo(ImageView staticView, ImageView dynamicView) {
         staticImage = staticView;
         dynamicImage = dynamicView;
@@ -70,59 +61,8 @@ class DisableDynamicLogo extends TimerTask {
 
 }
 
-
-class TableRowString {
-    TableRowString() {
-    }
-
-    ;
-
-    TableRowString(String id, String data) {
-        m_Data = data;
-        m_ID = id;
-    }
-
-    ;
-
-    public String getValue() {
-        return m_Data;
-    }
-
-    public String getOption() {
-        return m_ID;
-    }
-
-    private String m_Data;
-    private String m_ID;
-}
-
-class TableRowBool {
-    TableRowBool() {
-    }
-
-    ;
-
-    TableRowBool(String id, Boolean data) {
-        m_Data = data;
-        m_ID = id;
-    }
-
-    ;
-
-    public Boolean getValue() {
-        return m_Data;
-    }
-
-    public String getOption() {
-        return m_ID;
-    }
-
-    private Boolean m_Data;
-    private String m_ID;
-}
-
-
-public class Main extends Application {
+public class Main extends Application
+{
 
     private double sceneXOffset;
     private double sceneYOffset;
@@ -200,19 +140,22 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
 
-        logoTimer = new Timer(true);
+
+        //--------------------------------------------------------------------
+        // ROOT SETTINGS
+        //--------------------------------------------------------------------
 
         Parent root = FXMLLoader.load(getClass().getResource("sample.fxml"));
-
-        root.setOnMousePressed(new EventHandler<MouseEvent>() {
+        root.setOnMousePressed(new EventHandler<MouseEvent>()
+        {
             @Override
             public void handle(MouseEvent event) {
                 sceneXOffset = event.getSceneX();
                 sceneYOffset = event.getSceneY();
             }
         });
-
-        root.setOnMouseDragged(new EventHandler<MouseEvent>() {
+        root.setOnMouseDragged(new EventHandler<MouseEvent>()
+        {
             @Override
             public void handle(MouseEvent event) {
                 primaryStage.setX(event.getScreenX() - sceneXOffset);
@@ -223,9 +166,13 @@ public class Main extends Application {
 
         Scene scene = new Scene(root, 1024, 576);
         scene.setFill(Color.TRANSPARENT);
+
+        //--------------------------------------------------------------------
+        // GET NODES
+        //--------------------------------------------------------------------
+
         Hyperlink githubHyperlink = (Hyperlink) scene.lookup("#githubHyperlink");
         Hyperlink inanevinHyperlink = (Hyperlink) scene.lookup("#inanevinHyperlink");
-
         logoDynamic = (ImageView) scene.lookup("#logoDynamic");
         logoStatic = (ImageView) scene.lookup("#logoStatic");
         generatorBox = (ComboBox<String>) scene.lookup("#generatorComboBox");
@@ -237,7 +184,12 @@ public class Main extends Application {
         locateSourceButton = (Button) scene.lookup("#locateSourceButton");
         locateBuildButton = (Button) scene.lookup("#locateBuildButton");
 
-        generateButton.setOnAction(new EventHandler<ActionEvent>() {
+        //--------------------------------------------------------------------
+        // BUTTON CALLBACKS
+        //--------------------------------------------------------------------
+
+        generateButton.setOnAction(new EventHandler<ActionEvent>()
+        {
             @Override
             public void handle(ActionEvent event) {
 
@@ -245,116 +197,136 @@ public class Main extends Application {
 
             }
         });
-
-        generateAndBuildButton.setOnAction(new EventHandler<ActionEvent>() {
+        generateAndBuildButton.setOnAction(new EventHandler<ActionEvent>()
+        {
             @Override
             public void handle(ActionEvent event) {
                 GenerateProjectFiles(true);
             }
         });
-
-        locateSourceButton.setOnAction(new EventHandler<ActionEvent>() {
+        locateSourceButton.setOnAction(new EventHandler<ActionEvent>()
+        {
             @Override
             public void handle(ActionEvent event) {
                 DirectoryChooser directoryChooser = new DirectoryChooser();
                 File dir = new File(sourceField.getText());
                 if (dir.exists())
+                {
                     directoryChooser.setInitialDirectory(dir);
+                }
                 File selectedDirectory = directoryChooser.showDialog(primaryStage);
 
                 if (selectedDirectory != null)
+                {
                     sourceField.setText(selectedDirectory.getAbsolutePath());
+                }
             }
         });
-
-        locateBuildButton.setOnAction(new EventHandler<ActionEvent>() {
+        locateBuildButton.setOnAction(new EventHandler<ActionEvent>()
+        {
             @Override
             public void handle(ActionEvent event) {
                 DirectoryChooser directoryChooser = new DirectoryChooser();
                 File dir = new File(buildField.getText());
                 if (dir.exists())
+                {
                     directoryChooser.setInitialDirectory(dir);
+                }
                 File selectedDirectory = directoryChooser.showDialog(primaryStage);
 
                 if (selectedDirectory != null)
+                {
                     buildField.setText(selectedDirectory.getAbsolutePath());
+                }
             }
         });
 
+        //--------------------------------------------------------------------
+        // GENERATOR COMBOBOX SETTINGS
+        //--------------------------------------------------------------------
         generatorBox.setItems(FXCollections.observableArrayList(generators));
         generatorBox.setValue(generators[0]);
-        githubHyperlink.setOnAction(new EventHandler<ActionEvent>() {
+
+        //--------------------------------------------------------------------
+        // HYPERLINK SETTINGS
+        //--------------------------------------------------------------------
+        githubHyperlink.setOnAction(new EventHandler<ActionEvent>()
+        {
             @Override
             public void handle(ActionEvent event) {
                 getHostServices().showDocument("https://github.com/inanevin/LinaEngine");
             }
         });
 
-        inanevinHyperlink.setOnAction(new EventHandler<ActionEvent>() {
+        inanevinHyperlink.setOnAction(new EventHandler<ActionEvent>()
+        {
             @Override
             public void handle(ActionEvent event) {
                 getHostServices().showDocument("https://inanevin.com");
             }
         });
 
+        //--------------------------------------------------------------------
+        // OPTION TABLE VIEW SETTINGS
+        //--------------------------------------------------------------------
+
+        // Create & set data.
         ObservableList<Pair<String, Object>> data = FXCollections.observableArrayList(
                 pair("CMAKE_CONFIGURATION_TYPES", "Debug;Release;MinSizeRel;RelWithDebInfo;"),
                 pair("LINA_BUILD_SANDBOX", true),
                 pair("LINA_ENABLE_LOGGING", true)
         );
-
         optionsTable.getItems().setAll(data);
 
+        // Set columns
         TableColumn<Pair<String, Object>, String> nameColumn = new TableColumn<>("OPTION");
         nameColumn.setPrefWidth(100);
-
         TableColumn<Pair<String, Object>, Object> valueColumn = new TableColumn<>("VALUE");
         valueColumn.setSortable(false);
         valueColumn.setPrefWidth(150);
-
         nameColumn.setCellValueFactory(new PairKeyFactory());
         valueColumn.setCellValueFactory(new PairValueFactory());
-
         optionsTable.getColumns().setAll(nameColumn, valueColumn);
-        valueColumn.setCellFactory(new Callback<TableColumn<Pair<String, Object>, Object>, TableCell<Pair<String, Object>, Object>>() {
+        valueColumn.setCellFactory(new Callback<TableColumn<Pair<String, Object>, Object>, TableCell<Pair<String, Object>, Object>>()
+        {
             @Override
             public TableCell<Pair<String, Object>, Object> call(TableColumn<Pair<String, Object>, Object> column) {
                 return new PairValueCell();
             }
         });
-      /*  BuildOption<String> option1 = new BuildOption<>("CMAKE_CONFIGURATION_TYPES","Debug;Release;MinSizeRel;RelWithDebInfo;" );
-        BuildOption<Boolean> option2 = new BuildOption<>("LINA_BUILD_SANDBOX",true );
-        BuildOption<Boolean> option3 = new BuildOption<>("LINA_ENABLE_LOGGING",true );
-
-        final ObservableList<BuildOption<?>> data = FXCollections.observableArrayList(option1, option2, option3);
-
-        final TableColumn<String, BuildOption<?>> nameColumn = new TableColumn<>( "Option" );
-        nameColumn.setCellValueFactory( new PropertyValueFactory<>( "firstName" ));
-
-        TableColumn<String, BuildOption<?>> particularValueCol = new TableColumn<>("Value");
-        particularValueCol.setCellValueFactory(new PropertyValueFactory<>("particularValue"));
-        particularValueCol.setCel
 
 
-       optionsTable.setItems(data);
-       optionsTable.getColumns().addAll(nameColumn, particularValueCol);*/
-
-
+        //--------------------------------------------------------------------
+        // STAGE SETTINGS
+        //--------------------------------------------------------------------
         primaryStage.setTitle("Lina Engine Build Launcher");
         primaryStage.setScene(scene);
         primaryStage.setResizable(false);
         primaryStage.initStyle(StageStyle.TRANSPARENT);
-        //primaryStage.getScene().getStylesheets().setAll(Main.class.getResource("main.css").toString());
         primaryStage.show();
 
+        //--------------------------------------------------------------------
+        // DYNAMIC LOGO TIMER
+        //--------------------------------------------------------------------
+        logoTimer = new Timer(true);
         logoTimer.scheduleAtFixedRate(new EnableDynamicLogo(logoStatic, logoDynamic, logoTimer), logoChangeRate * 1000, logoChangeRate * 1000);
     }
 
     void GenerateProjectFiles(boolean buildAsWell) {
-        if (buildField.getText().equals("")) {
+
+        //--------------------------------------------------------------------
+        // CHECK IF BUILD FIELD IS EMPTY
+        //--------------------------------------------------------------------
+        if (buildField.getText().equals(""))
+        {
+            // Create alert
             Alert alert = new Alert(Alert.AlertType.ERROR);
+
+            // Set alert icon
             Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
             stage.getIcons().add(new Image(getClass().getResource("logo_static.png").toString()));
+
+            // Configure alert & show.
             alert.setTitle("Error on  Build Directory!");
             alert.setHeaderText(null);
             alert.setContentText("Please specify a build directory!");
@@ -362,12 +334,20 @@ public class Main extends Application {
             return;
         }
 
+        //--------------------------------------------------------------------
+        // CHECK IF SOURCE FIELD IS VALID
+        //--------------------------------------------------------------------
         String isSourceDirectoryValid = IsSourceDirectoryValid();
-
-        if (!isSourceDirectoryValid.equals("")) {
+        if (!isSourceDirectoryValid.equals(""))
+        {
+            // Create alert
             Alert alert = new Alert(Alert.AlertType.ERROR);
+
+            // Set alert icon.
             Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
             stage.getIcons().add(new Image(getClass().getResource("logo_static.png").toString()));
+
+            // Configura alert & show.
             alert.setTitle("Error on Source Directory!");
             alert.setHeaderText(null);
             alert.setContentText(isSourceDirectoryValid);
@@ -375,78 +355,113 @@ public class Main extends Application {
             return;
         }
 
-
+        //--------------------------------------------------------------------
+        // CHECK IF BUILD DIRECTORY IS VALID
+        //--------------------------------------------------------------------
         String isBuildDirectoryValid = IsBuildDirectoryValid();
-
-        if (!isBuildDirectoryValid.equals("")) {
+        if (!isBuildDirectoryValid.equals(""))
+        {
+            // Create alert
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+
+            // Set alert icon.
             Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
             stage.getIcons().add(new Image(getClass().getResource("logo_static.png").toString()));
+
+            // Configure alert.
             alert.setTitle("Warning about Build Directory!");
             alert.setHeaderText(null);
             alert.setContentText(isBuildDirectoryValid);
 
+            // Create alert buttons.
             ButtonType continueButton = new ButtonType("Continue Anyway");
             ButtonType cancelButton = new ButtonType("Cancel");
 
+            // Set buttons & show alert.
             alert.getButtonTypes().setAll(continueButton, cancelButton);
-
             Optional<ButtonType> result = alert.showAndWait();
-            if (result.get() == cancelButton) {
+
+            // Check button click result.
+            if (result.get() == cancelButton)
+            {
                 return;
             }
-
         }
-        if (!buildAsWell) {
-            String generatorString = "-G " + "\"" + generatorBox.getValue() + "\"";
-            String optionsString = "";
 
-            ObservableList<Pair<String, Object>> items = optionsTable.getItems();
-            Iterator<Pair<String, Object>> it = items.iterator();
+        //--------------------------------------------------------------------
+        // CMAKE COMMAND GENERATION
+        //--------------------------------------------------------------------
 
-            while (it.hasNext()) {
-                Pair<String, Object> row = it.next();
+        // Define strings
+        String generatorString = "-G " + "\"" + generatorBox.getValue() + "\"";
+        String optionsString = "";
 
-                String typeString = "";
-                String valueString = "";
+        // Get item list from the options table & an iterator for it.
+        ObservableList<Pair<String, Object>> items = optionsTable.getItems();
+        Iterator<Pair<String, Object>> it = items.iterator();
 
-                if (row.getValue() instanceof String) {
-                    typeString = "STRING";
-                    valueString = row.getValue().toString();
-                } else if (row.getValue() instanceof Boolean) {
-                    typeString = "BOOL";
+        // Iterate all the items.
+        while (it.hasNext())
+        {
 
-                    if ((boolean) row.getValue())
-                        valueString = "ON";
-                    else
-                        valueString = "OFF";
+            // Item & strings dec.
+            Pair<String, Object> row = it.next();
+            String typeString = "";
+            String valueString = "";
+
+            // Check item type and set type string as well as the value string accordingly.
+            if (row.getValue() instanceof String)
+            {
+                typeString = "STRING";
+                valueString = row.getValue().toString();
+            }
+            else if (row.getValue() instanceof Boolean)
+            {
+                typeString = "BOOL";
+                if ((boolean) row.getValue())
+                {
+                    valueString = "ON";
                 }
-
-                optionsString += "-D" + row.getKey() + ":" + typeString + "=" + valueString + " ";
-
+                else
+                {
+                    valueString = "OFF";
+                }
             }
 
+            // Increment option string.
+            optionsString += "-D" + row.getKey() + ":" + typeString + "=" + valueString + " ";
 
-            String command = "cmake " + optionsString + generatorString + " " + sourceField.getText();
-            System.out.println(command);
-        } else {
+        }
+
+        // Concat the command for generating project files.
+        String projectFileGenerateCommand = "cmake " + optionsString + generatorString + " " + sourceField.getText();
+
+
+        if (buildAsWell)
+        {
 
         }
     }
 
     String IsBuildDirectoryValid() {
 
-        File dir = new File(buildField.getText());
+        //--------------------------------------------------------------------
+        // VALIDATE BUILD DIRECTORY
+        //--------------------------------------------------------------------
 
-        File[] matches = dir.listFiles(new FilenameFilter() {
+        // Check FOR CMakeCache.txt file in the build directory.
+        File dir = new File(buildField.getText());
+        File[] matches = dir.listFiles(new FilenameFilter()
+        {
             @Override
             public boolean accept(File dir, String name) {
                 return name.startsWith("CMakeCache") && name.endsWith(".txt");
             }
         });
 
-
-        if (matches != null && matches.length != 0) {
+        // If a match exist, return the warning.
+        if (matches != null && matches.length != 0)
+        {
             return "This directory already contains a CMakeCache.txt meaning that it was used for a CMakeBuild before." +
                     "If Lina Engine was previously built here, build configurations may not work. Consider deleting the CMakeCache.txt or building to a different directory.";
         }
@@ -456,38 +471,59 @@ public class Main extends Application {
 
     String IsSourceDirectoryValid() {
 
-        if(sourceField.getText().equals("")) return "Please specify Lina Engine source directory!";
 
+        //--------------------------------------------------------------------
+        // VALIDATE SOURCE DIRECTORY
+        //--------------------------------------------------------------------
+
+        // Return if directory is empty.
+        if (sourceField.getText().equals("")) return "Please specify Lina Engine source directory!";
+
+        // Check if CMakeLists.txt exists.
         File dir = new File(sourceField.getText());
-
-        File[] matches = dir.listFiles(new FilenameFilter() {
+        File[] matches = dir.listFiles(new FilenameFilter()
+        {
             @Override
             public boolean accept(File dir, String name) {
                 return name.startsWith("CMakeLists") && name.endsWith(".txt");
             }
         });
 
+        // Return if there is no CMakeLists.txt
         if (matches == null || matches.length == 0)
+        {
             return "CMakeLists.txt could not be found in the source directory. Please make sure you select the root folder of Lina Engine source directory.";
+        }
 
+        // Read the first line of CMakeLists.txt and check if matches the token.
         File cmakeFile = matches[0];
 
-        try {
+        try
+        {
+
+            // Get buffer & read.
             BufferedReader reader = new BufferedReader(new FileReader(cmakeFile));
             String text = reader.readLine();
 
-            if (text.equals(sourceDirectoryIdentifier)) {
+            // Return no errors if matches, return error if not.
+            if (text.equals(sourceDirectoryIdentifier))
+            {
                 // Correct dir.
                 return "";
-            } else {
+            }
+            else
+            {
                 return "CMakeLists file in the source directory looks corrupted. Please make sure it includes the source directory identifier in the first line.";
             }
-        } catch (FileNotFoundException e) {
-            return e.getMessage();
-        } catch (IOException e) {
+        }
+        catch (FileNotFoundException e)
+        {
             return e.getMessage();
         }
-
+        catch (IOException e)
+        {
+            return e.getMessage();
+        }
     }
 
 
