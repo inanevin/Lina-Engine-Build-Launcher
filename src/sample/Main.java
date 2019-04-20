@@ -29,9 +29,9 @@ import javafx.util.Pair;
 
 
 import java.io.*;
-import java.util.Optional;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.*;
 
 
 class EnableDynamicLogo extends TimerTask {
@@ -71,31 +71,55 @@ class DisableDynamicLogo extends TimerTask {
 }
 
 
-class TableRowString
-{
-    TableRowString() {};
-    TableRowString(String id, String data) { m_Data = data; m_ID = id;};
+class TableRowString {
+    TableRowString() {
+    }
 
-    public String getValue() { return m_Data; }
-    public String getOption() { return m_ID; }
+    ;
+
+    TableRowString(String id, String data) {
+        m_Data = data;
+        m_ID = id;
+    }
+
+    ;
+
+    public String getValue() {
+        return m_Data;
+    }
+
+    public String getOption() {
+        return m_ID;
+    }
 
     private String m_Data;
     private String m_ID;
 }
 
-class TableRowBool
-{
-    TableRowBool() {};
-    TableRowBool(String id, Boolean data) { m_Data = data; m_ID = id;};
+class TableRowBool {
+    TableRowBool() {
+    }
 
-    public Boolean getValue() { return m_Data; }
-    public String getOption() { return m_ID; }
+    ;
+
+    TableRowBool(String id, Boolean data) {
+        m_Data = data;
+        m_ID = id;
+    }
+
+    ;
+
+    public Boolean getValue() {
+        return m_Data;
+    }
+
+    public String getOption() {
+        return m_ID;
+    }
 
     private Boolean m_Data;
     private String m_ID;
 }
-
-
 
 
 public class Main extends Application {
@@ -209,7 +233,7 @@ public class Main extends Application {
         sourceField = (TextField) scene.lookup("#sourceField");
         buildField = (TextField) scene.lookup("#buildField");
         generateButton = (Button) scene.lookup("#generateButton");
-        generateAndBuildButton = (Button)scene.lookup("#generateAndBuildButton");
+        generateAndBuildButton = (Button) scene.lookup("#generateAndBuildButton");
         locateSourceButton = (Button) scene.lookup("#locateSourceButton");
         locateBuildButton = (Button) scene.lookup("#locateBuildButton");
 
@@ -233,9 +257,12 @@ public class Main extends Application {
             @Override
             public void handle(ActionEvent event) {
                 DirectoryChooser directoryChooser = new DirectoryChooser();
+                File dir = new File(sourceField.getText());
+                if (dir.exists())
+                    directoryChooser.setInitialDirectory(dir);
                 File selectedDirectory = directoryChooser.showDialog(primaryStage);
 
-                if(selectedDirectory != null)
+                if (selectedDirectory != null)
                     sourceField.setText(selectedDirectory.getAbsolutePath());
             }
         });
@@ -244,9 +271,12 @@ public class Main extends Application {
             @Override
             public void handle(ActionEvent event) {
                 DirectoryChooser directoryChooser = new DirectoryChooser();
+                File dir = new File(buildField.getText());
+                if (dir.exists())
+                    directoryChooser.setInitialDirectory(dir);
                 File selectedDirectory = directoryChooser.showDialog(primaryStage);
 
-                if(selectedDirectory != null)
+                if (selectedDirectory != null)
                     buildField.setText(selectedDirectory.getAbsolutePath());
             }
         });
@@ -268,9 +298,9 @@ public class Main extends Application {
         });
 
         ObservableList<Pair<String, Object>> data = FXCollections.observableArrayList(
-                pair("CMAKE_CONFIGURATION_TYPES","Debug;Release;MinSizeRel;RelWithDebInfo;"),
-                pair("LINA_BUILD_SANDBOX",true),
-                pair("LINA_ENABLE_LOGGING",true )
+                pair("CMAKE_CONFIGURATION_TYPES", "Debug;Release;MinSizeRel;RelWithDebInfo;"),
+                pair("LINA_BUILD_SANDBOX", true),
+                pair("LINA_ENABLE_LOGGING", true)
         );
 
         optionsTable.getItems().setAll(data);
@@ -310,8 +340,6 @@ public class Main extends Application {
        optionsTable.getColumns().addAll(nameColumn, particularValueCol);*/
 
 
-
-
         primaryStage.setTitle("Lina Engine Build Launcher");
         primaryStage.setScene(scene);
         primaryStage.setResizable(false);
@@ -322,12 +350,21 @@ public class Main extends Application {
         logoTimer.scheduleAtFixedRate(new EnableDynamicLogo(logoStatic, logoDynamic, logoTimer), logoChangeRate * 1000, logoChangeRate * 1000);
     }
 
-    void GenerateProjectFiles(boolean buildAsWell)
-    {
+    void GenerateProjectFiles(boolean buildAsWell) {
+        if (buildField.getText().equals("")) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+            stage.getIcons().add(new Image(getClass().getResource("logo_static.png").toString()));
+            alert.setTitle("Error on  Build Directory!");
+            alert.setHeaderText(null);
+            alert.setContentText("Please specify a build directory!");
+            alert.showAndWait();
+            return;
+        }
+
         String isSourceDirectoryValid = IsSourceDirectoryValid();
 
-        if(!isSourceDirectoryValid.equals(""))
-        {
+        if (!isSourceDirectoryValid.equals("")) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
             stage.getIcons().add(new Image(getClass().getResource("logo_static.png").toString()));
@@ -338,10 +375,10 @@ public class Main extends Application {
             return;
         }
 
-        String isBuildDirectoryValid= IsBuildDirectoryValid();
 
-        if(!isBuildDirectoryValid.equals(""))
-        {
+        String isBuildDirectoryValid = IsBuildDirectoryValid();
+
+        if (!isBuildDirectoryValid.equals("")) {
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
             Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
             stage.getIcons().add(new Image(getClass().getResource("logo_static.png").toString()));
@@ -360,19 +397,44 @@ public class Main extends Application {
             }
 
         }
-        if(!buildAsWell)
-        {
-            
-        }
-        else
-        {
+        if (!buildAsWell) {
+            String generatorString = "-G " + "\"" + generatorBox.getValue() + "\"";
+            String optionsString = "";
+
+            ObservableList<Pair<String, Object>> items = optionsTable.getItems();
+            Iterator<Pair<String, Object>> it = items.iterator();
+
+            while (it.hasNext()) {
+                Pair<String, Object> row = it.next();
+
+                String typeString = "";
+                String valueString = "";
+
+                if (row.getValue() instanceof String) {
+                    typeString = "STRING";
+                    valueString = row.getValue().toString();
+                } else if (row.getValue() instanceof Boolean) {
+                    typeString = "BOOL";
+
+                    if ((boolean) row.getValue())
+                        valueString = "ON";
+                    else
+                        valueString = "OFF";
+                }
+
+                optionsString += "-D" + row.getKey() + ":" + typeString + "=" + valueString + " ";
+
+            }
+
+
+            String command = "cmake " + optionsString + generatorString + " " + sourceField.getText();
+            System.out.println(command);
+        } else {
 
         }
     }
 
-    String IsBuildDirectoryValid()
-    {
-        if(buildField.getText().equals("")) return "Please specify a build directory!";
+    String IsBuildDirectoryValid() {
 
         File dir = new File(buildField.getText());
 
@@ -383,8 +445,8 @@ public class Main extends Application {
             }
         });
 
-        if(matches != null)
-        {
+
+        if (matches != null && matches.length != 0) {
             return "This directory already contains a CMakeCache.txt meaning that it was used for a CMakeBuild before." +
                     "If Lina Engine was previously built here, build configurations may not work. Consider deleting the CMakeCache.txt or building to a different directory.";
         }
@@ -392,8 +454,10 @@ public class Main extends Application {
         return "";
     }
 
-    String IsSourceDirectoryValid()
-    {
+    String IsSourceDirectoryValid() {
+
+        if(sourceField.getText().equals("")) return "Please specify Lina Engine source directory!";
+
         File dir = new File(sourceField.getText());
 
         File[] matches = dir.listFiles(new FilenameFilter() {
@@ -403,32 +467,24 @@ public class Main extends Application {
             }
         });
 
-        if(matches == null || matches.length == 0)
+        if (matches == null || matches.length == 0)
             return "CMakeLists.txt could not be found in the source directory. Please make sure you select the root folder of Lina Engine source directory.";
 
         File cmakeFile = matches[0];
 
-        try
-        {
+        try {
             BufferedReader reader = new BufferedReader(new FileReader(cmakeFile));
             String text = reader.readLine();
 
-            if(text.equals(sourceDirectoryIdentifier))
-            {
+            if (text.equals(sourceDirectoryIdentifier)) {
                 // Correct dir.
                 return "";
-            }
-            else
-            {
+            } else {
                 return "CMakeLists file in the source directory looks corrupted. Please make sure it includes the source directory identifier in the first line.";
             }
-        }
-        catch(FileNotFoundException e)
-        {
+        } catch (FileNotFoundException e) {
             return e.getMessage();
-        }
-        catch(IOException e)
-        {
+        } catch (IOException e) {
             return e.getMessage();
         }
 
