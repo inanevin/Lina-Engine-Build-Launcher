@@ -14,7 +14,7 @@
    <children>
       <Pane prefHeight="576.0" prefWidth="427.0" style="-fx-background-color: linear-gradient(#000000,#000000,#3F0D12); -fx-background-radius: 3 0 0 3;">
          <children>
-            <ImageView id="logoStatic" blendMode="SRC_ATOP" fitHeight="210.0" fitWidth="158.0" layoutX="138.0" layoutY="25.0" mouseTransparent="true" pickOnBounds="true" preserveRatio="true">
+            <ImageView id="logoStatic" blendMode="SRC_ATOP" fitHeight="149.0" fitWidth="113.0" layoutX="160.0" layoutY="34.0" mouseTransparent="true" pickOnBounds="true" preserveRatio="true">
                <image>
                   <Image url="@logo_static.png" />
                </image>
@@ -30,12 +30,12 @@
                <font>
                   <Font size="9.0" />
                </font></Label>
-            <Label layoutX="15.0" layoutY="344.0" prefHeight="91.0" prefWidth="397.0" text="This launcher creates a new project based on Lina Engine source code with an empty sandbox application. Actual build process is handled via CMake therefore it is required to install CMake on your device in order to use this launcher. For more information about building Lina from source code please visit Lina Engine's Github page." textAlignment="CENTER" textFill="#756583" wrapText="true">
+            <Label layoutX="15.0" layoutY="286.0" prefHeight="53.0" prefWidth="397.0" text="Use this launcher to create a new empty sandbox project based on Lina Engine source. You will be able to compile Lina Engine source and use it according to your needs." textAlignment="CENTER" textFill="#756583" wrapText="true">
                <font>
                   <Font size="11.0" />
                </font></Label>
-            <Hyperlink id="hyperlink" layoutX="177.0" layoutY="451.0" text="Github Page" underline="true" />
-            <ImageView id="text_dynamic" blendMode="SRC_ATOP" fitHeight="74.0" fitWidth="248.0" layoutX="90.0" layoutY="257.0" mouseTransparent="true" pickOnBounds="true" preserveRatio="true">
+            <Hyperlink id="hyperlink" layoutX="177.0" layoutY="467.0" text="Github Page" underline="true" />
+            <ImageView id="text_dynamic" blendMode="SRC_ATOP" fitHeight="98.0" fitWidth="297.0" layoutX="64.0" layoutY="208.0" mouseTransparent="true" pickOnBounds="true" preserveRatio="true">
                <image>
                   <Image url="@text_dynamic.gif" />
                </image>
@@ -43,7 +43,7 @@
                   <Glow />
                </effect>
             </ImageView>
-            <ImageView id="logoDynamic" blendMode="SRC_ATOP" disable="true" fitHeight="210.0" fitWidth="158.0" layoutX="138.0" layoutY="25.0" mouseTransparent="true" pickOnBounds="true" preserveRatio="true" visible="false">
+            <ImageView id="logoDynamic" blendMode="SRC_ATOP" disable="true" fitHeight="149.0" fitWidth="113.0" layoutX="161.0" layoutY="34.0" mouseTransparent="true" pickOnBounds="true" preserveRatio="true" visible="false">
                <image>
                   <Image url="@logo_dynamic.gif" />
                </image>
@@ -51,6 +51,16 @@
                   <Glow />
                </effect>
             </ImageView>
+            <Label layoutX="14.0" layoutY="352.0" prefHeight="53.0" prefWidth="397.0" text="This launcher uses CMake to handle the build process of project files for your desired IDE. Therefore CMake 3.6 or above is required to be installed on your machine." textAlignment="CENTER" textFill="#756583" wrapText="true">
+               <font>
+                  <Font size="11.0" />
+               </font>
+            </Label>
+            <Label layoutX="64.0" layoutY="414.0" prefHeight="53.0" prefWidth="297.0" text="Please visit Lina Engine's Github page for more information." textAlignment="CENTER" textFill="#756583" wrapText="true">
+               <font>
+                  <Font size="11.0" />
+               </font>
+            </Label>
          </children>
       </Pane>
    </children>

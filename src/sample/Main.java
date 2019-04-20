@@ -47,10 +47,11 @@ class WindowButtons extends HBox {
 
 class EnableDynamicLogo extends TimerTask
 {
-    EnableDynamicLogo(ImageView staticView, ImageView dynamicView)
+    EnableDynamicLogo(ImageView staticView, ImageView dynamicView, Timer target)
     {
         staticImage = staticView;
         dynamicImage = dynamicView;
+        targetTimer = target;
     }
 
     @Override
@@ -58,7 +59,7 @@ class EnableDynamicLogo extends TimerTask
     {
         dynamicImage.setVisible(true);
         staticImage.setVisible(false);
-        targetTimer.schedule(new DisableDynamicLogo(staticImage, dynamicImage), 1*1000);
+        targetTimer.schedule(new DisableDynamicLogo(staticImage, dynamicImage), 2*1000);
     }
 
     private ImageView staticImage;
@@ -93,7 +94,7 @@ public class Main extends Application {
     ImageView logoDynamic;
     ImageView logoStatic;
     Timer logoTimer;
-    private int logoChangeRate = 3;
+    private int logoChangeRate = 5;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -139,7 +140,7 @@ public class Main extends Application {
         //primaryStage.getScene().getStylesheets().setAll(Main.class.getResource("main.css").toString());
         primaryStage.show();
 
-        logoTimer.scheduleAtFixedRate(new EnableDynamicLogo(logoStatic, logoDynamic), logoChangeRate*1000, logoChangeRate*1000);
+        logoTimer.scheduleAtFixedRate(new EnableDynamicLogo(logoStatic, logoDynamic, logoTimer), logoChangeRate*1000, logoChangeRate*1000);
     }
 
 
