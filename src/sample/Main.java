@@ -29,6 +29,7 @@ import javafx.util.Pair;
 
 
 import java.io.*;
+import java.util.Optional;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -341,18 +342,27 @@ public class Main extends Application {
 
         if(!isBuildDirectoryValid.equals(""))
         {
-            Alert alert = new Alert(Alert.AlertType.WARNING);
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
             Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
             stage.getIcons().add(new Image(getClass().getResource("logo_static.png").toString()));
             alert.setTitle("Warning about Build Directory!");
             alert.setHeaderText(null);
             alert.setContentText(isBuildDirectoryValid);
-            alert.showAndWait();
-            return;
+
+            ButtonType continueButton = new ButtonType("Continue Anyway");
+            ButtonType cancelButton = new ButtonType("Cancel");
+
+            alert.getButtonTypes().setAll(continueButton, cancelButton);
+
+            Optional<ButtonType> result = alert.showAndWait();
+            if (result.get() == cancelButton) {
+                return;
+            }
+
         }
         if(!buildAsWell)
         {
-
+            
         }
         else
         {
