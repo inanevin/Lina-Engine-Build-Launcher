@@ -13,6 +13,7 @@ import javafx.scene.Scene;
 
 import javafx.scene.control.*;
 
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 
@@ -322,12 +323,33 @@ public class Main extends Application {
 
     void GenerateProjectFiles(boolean buildAsWell)
     {
-        if(!IsSourceDirectoryValid().equals(""))
-        {
+        String isSourceDirectoryValid = IsSourceDirectoryValid();
 
+        if(!isSourceDirectoryValid.equals(""))
+        {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+            stage.getIcons().add(new Image(getClass().getResource("logo_static.png").toString()));
+            alert.setTitle("Error on Source Directory!");
+            alert.setHeaderText(null);
+            alert.setContentText(isSourceDirectoryValid);
+            alert.showAndWait();
             return;
         }
 
+        String isBuildDirectoryValid= IsBuildDirectoryValid();
+
+        if(!isBuildDirectoryValid.equals(""))
+        {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+            stage.getIcons().add(new Image(getClass().getResource("logo_static.png").toString()));
+            alert.setTitle("Warning about Build Directory!");
+            alert.setHeaderText(null);
+            alert.setContentText(isBuildDirectoryValid);
+            alert.showAndWait();
+            return;
+        }
         if(!buildAsWell)
         {
 
@@ -336,6 +358,28 @@ public class Main extends Application {
         {
 
         }
+    }
+
+    String IsBuildDirectoryValid()
+    {
+        if(buildField.getText().equals("")) return "Please specify a build directory!";
+
+        File dir = new File(buildField.getText());
+
+        File[] matches = dir.listFiles(new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String name) {
+                return name.startsWith("CMakeCache") && name.endsWith(".txt");
+            }
+        });
+
+        if(matches != null)
+        {
+            return "This directory already contains a CMakeCache.txt meaning that it was used for a CMakeBuild before." +
+                    "If Lina Engine was previously built here, build configurations may not work. Consider deleting the CMakeCache.txt or building to a different directory.";
+        }
+
+        return "";
     }
 
     String IsSourceDirectoryValid()
@@ -349,7 +393,7 @@ public class Main extends Application {
             }
         });
 
-        if(matches.length == 0)
+        if(matches == null || matches.length == 0)
             return "CMakeLists.txt could not be found in the source directory. Please make sure you select the root folder of Lina Engine source directory.";
 
         File cmakeFile = matches[0];
