@@ -8,4 +8,6 @@ This is a utility tool for generating project files from Lina Engine source code
 uses CMake as a build system. This tool simplifies the process of running CMake commands. You can use CMake from shell or CMake GUI to
 generate project files for Lina Engine and build them, or you can use this Launcher for a simplified interface.
 
+## Usage
 
+![img](Docs/LauncherScreenshot.png)
