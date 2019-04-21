@@ -19,15 +19,16 @@ public class StreamGobbler extends Thread {
 
     public StreamGobbler(InputStream inputStream,  Main m, ProgressForm form) {
         this.inputStream = inputStream;
-        //this.consumer = consumer;
         this.main = m;
         this.progressForm = form;
     }
 
     @Override
     public void run() {
-        //new BufferedReader(new InputStreamReader(inputStream)).lines()
-               // .forEach(consumer);
+
+        //----------------------------------------------------------------------------
+        // Feed the streams into main.
+        //----------------------------------------------------------------------------
         try {
             InputStreamReader isr = new InputStreamReader(inputStream);
             BufferedReader br = new BufferedReader(isr);
@@ -42,7 +43,6 @@ public class StreamGobbler extends Thread {
                         UpdateTextArea();
                     }
                 });
-
             }
         }
         catch (IOException ioe) {
