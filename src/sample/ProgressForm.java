@@ -5,10 +5,12 @@ import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import javafx.stage.WindowEvent;
 
 public class ProgressForm {
 
@@ -19,6 +21,9 @@ public class ProgressForm {
     private TextArea textArea;
     private String inputFeed;
     private Button quitButton;
+
+    private double sceneXOffset;
+    private double sceneYOffset;
 
     public ProgressBar getProgressBar() {
         return progressBar;
@@ -108,6 +113,25 @@ public class ProgressForm {
 
         Scene scene = new Scene(verticalContainer);
         dialogStage.setScene(scene);
+        dialogStage.initStyle(StageStyle.UNDECORATED);
+
+        verticalContainer.setOnMousePressed(new EventHandler<MouseEvent>()
+        {
+            @Override
+            public void handle(MouseEvent event) {
+                sceneXOffset = event.getSceneX();
+                sceneYOffset = event.getSceneY();
+            }
+        });
+        verticalContainer.setOnMouseDragged(new EventHandler<MouseEvent>()
+        {
+            @Override
+            public void handle(MouseEvent event) {
+                dialogStage.setX(event.getScreenX() - sceneXOffset);
+                dialogStage.setY(event.getScreenY() - sceneYOffset);
+            }
+        });
+
     }
 
     public void activate()  {
