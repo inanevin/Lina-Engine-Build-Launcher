@@ -171,6 +171,7 @@ public class Main extends Application
         ImageView logoDynamic;
         ImageView logoStatic;
 
+        Button exit;
         Button generateButton;
         Button generateAndBuildButton;
         Button locateSourceButton;
@@ -198,7 +199,7 @@ public class Main extends Application
         });
 
 
-        Scene scene = new Scene(root, 1024, 576);
+        Scene scene = new Scene(root, 1000, 576);
         scene.setFill(Color.TRANSPARENT);
 
         //--------------------------------------------------------------------
@@ -219,6 +220,7 @@ public class Main extends Application
         locateSourceButton = (Button) scene.lookup("#locateSourceButton");
         locateBuildButton = (Button) scene.lookup("#locateBuildButton");
         chiptuneCheckbox = (CheckBox)scene.lookup("#chiptuneCheckBox");
+        exit = (Button)scene.lookup("#exitButton");
 
         //--------------------------------------------------------------------
         // MEDIA SETTINGS
@@ -230,6 +232,13 @@ public class Main extends Application
         // BUTTON CALLBACKS
         //--------------------------------------------------------------------
 
+        exit.setOnAction(new EventHandler<ActionEvent>()
+        {
+            @Override
+            public void handle(ActionEvent event) {
+                System.exit(0);
+            }
+        });
         generateButton.setOnAction(new EventHandler<ActionEvent>()
         {
             @Override

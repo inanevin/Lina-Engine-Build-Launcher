@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="Lina Engine Build Launcher:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/Lina_Engine_Build_Launcher_jar</output-path>
+    <root id="archive" name="Lina Engine Build Launcher.jar">
+      <element id="module-output" name="Lina Engine Build Launcher" />
+    </root>
+  </artifact>
+</component>
