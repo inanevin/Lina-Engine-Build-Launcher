@@ -1,18 +1,15 @@
 package sample;
 
 import javafx.application.Application;
-import javafx.beans.value.ObservableValue;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
-import javafx.concurrent.WorkerStateEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
@@ -24,12 +21,9 @@ import javafx.stage.StageStyle;
 import javafx.event.ActionEvent;
 import javafx.util.Callback;
 import javafx.util.Pair;
-import jdk.nashorn.tools.Shell;
 
-import javax.rmi.CORBA.Util;
 import java.io.*;
 import java.util.*;
-import java.util.concurrent.Executors;
 
 
 class EnableDynamicLogo extends TimerTask
@@ -91,7 +85,7 @@ public class Main extends Application
     private Button locateBuildButton;
     private Stage mainStage;
     private AnchorPane rootNode;
-    private CopyTask copyTask;
+    private ProgressForm currentProgressForm;
 
     private static Pair<String, Object> pair(String name, Object value) {
         return new Pair<>(name, value);
@@ -107,7 +101,7 @@ public class Main extends Application
 
     String generators[] =
             {
-                    "Visual Studio s15 2017",
+                    "Visual Studio 15 2017",
                     "Visual Studio 15 2017 ARM",
                     "Visual Studio 15 2017 Win64",
                     "Visual Studio 14 2015",
@@ -545,6 +539,7 @@ public class Main extends Application
         }
     }
 
+
     void ShellCommand(String command, String dir, boolean isLongTask)
     {
         //--------------------------------------------------------------------
@@ -579,10 +574,30 @@ public class Main extends Application
 
         if (isLongTask)
         {
-            ProgressForm pForm = new ProgressForm();
-            pForm.activate();
-            ShellCommandTask(processBuilder, pForm);
+            ProgressForm progressForm = new ProgressForm();
+            progressForm.activate();
+            currentProgressForm = progressForm;
 
+
+            Process process = null;
+            // In real life this task would do something useful and return
+            // some meaningful result:
+            Task<Void> task = new Task<Void>()
+            {
+                @Override
+                public Void call() throws InterruptedException {
+
+                    ShellCommandTask(processBuilder, progressForm);
+                    return null;
+                }
+            };
+
+            task.setOnSucceeded(event -> {
+
+            });
+
+            Thread thread = new Thread(task);
+            thread.start();
         }
         else
         {
@@ -810,30 +825,35 @@ public class Main extends Application
 
     void ShellCommandTask(ProcessBuilder processBuilder, ProgressForm progressForm)
     {
+
+
         // Run
         try
         {
-            Process process = processBuilder.start();
-
+            Process process  = processBuilder.start();
             BufferedReader reader =
                     new BufferedReader(new InputStreamReader(process.getInputStream()));
 
 
             String line;
             String temp;
-            //int lineSize = (int) reader.lines().count();
-            //int lineCounter = 0;
+
+            String appended = "";
 
             while ((line = reader.readLine()) != null)
             {
-                temp = line;
-                //lineCounter++;
-                progressForm.AddInputToFeed(temp);
+                progressForm.UpdateInputFeed(line);
+
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        UpdateTextArea();
+                    }
+                });
+
                 System.out.println(line);
-                //updateProgress(lineCounter, 100);
             }
 
-            //updateProgress(lineSize, lineSize);
 
             int exitCode = process.waitFor();
 
@@ -841,22 +861,37 @@ public class Main extends Application
             {
                 File errFile = new File(errorLogFile);
 
-
                 // Get buffer & read.
                 BufferedReader errReader = new BufferedReader(new FileReader(errFile));
                 String errLine = "";
 
-                String allLines = "";
-
                 while ((errLine = errReader.readLine()) != null)
                 {
-                    allLines += errLine + System.lineSeparator();
-                    //progressForm.AddInputToFeed(errLine);
+                    progressForm.UpdateInputFeed(errLine);
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            UpdateTextArea();
+                        }
+                    });
                 }
 
-                progressForm.ShowError("Error with exit code ");
-                progressForm.AddInputToFeed(allLines);
-                //ShowExceptionDialog(allLines, "Error while generating project files!");
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        ShowErrorOnProgress();
+                    }
+                });
+
+            }
+            else
+            {
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        ShowSuccessOnProgress();
+                    }
+                });
             }
             System.out.println("\nExited with error code : " + exitCode);
 
@@ -869,6 +904,31 @@ public class Main extends Application
         {
             ShowExceptionDialog(e, "Interrupted Exception!");
         }
+    }
+
+    void UpdateTextArea()
+    {
+        currentProgressForm.GetTextArea().appendText(currentProgressForm.GetInputFeed());
+    }
+
+    void ShowErrorOnProgress()
+    {
+        currentProgressForm.getInfoLabel().setVisible(true);
+        currentProgressForm.getProgressBar().setVisible(false);
+        currentProgressForm.getProgressIndicator().setVisible(false);
+        currentProgressForm.getQuitButton().setVisible(true);
+        currentProgressForm.getInfoLabel().setText("Error on Progress");
+        currentProgressForm.getInfoLabel().setTextFill(Color.web("#ff0000"));
+    }
+
+    void ShowSuccessOnProgress()
+    {
+        currentProgressForm.getInfoLabel().setVisible(true);
+        currentProgressForm.getProgressBar().setVisible(false);
+        currentProgressForm.getProgressIndicator().setVisible(false);
+        currentProgressForm.getQuitButton().setVisible(true);
+        currentProgressForm.getInfoLabel().setText("Success!");
+        currentProgressForm.getInfoLabel().setTextFill(Color.web("#00ff00"));
     }
 
     public static void main(String[] args) {

@@ -1,17 +1,11 @@
 package sample;
 
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
-import javafx.concurrent.Task;
-import javafx.geometry.Orientation;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
+import javafx.scene.layout.*;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -21,12 +15,30 @@ public class ProgressForm {
     private final Stage dialogStage;
     private final ProgressBar progressBar = new ProgressBar();
     private final ProgressIndicator progressIndicator = new ProgressIndicator();
-    private Label errorLabel;
+    private Label infoLabel;
     private TextArea textArea;
     private String inputFeed;
+    private Button quitButton;
 
-    private StringProperty inputFeedProperty = new SimpleStringProperty();
-    private StringProperty errorProperty = new SimpleStringProperty();
+    public ProgressBar getProgressBar() {
+        return progressBar;
+    }
+
+    public ProgressIndicator getProgressIndicator() {
+        return progressIndicator;
+    }
+
+    public Label getInfoLabel() {
+        return infoLabel;
+    }
+
+    public Button getQuitButton() {
+        return quitButton;
+    }
+
+
+    public String GetInputFeed() { return inputFeed;}
+    public TextArea GetTextArea() { return textArea; }
 
     public ProgressForm() {
         dialogStage = new Stage();
@@ -43,34 +55,39 @@ public class ProgressForm {
         progressIndicator.setPrefSize(24,24);
 
 
-        final Separator topSeparator = new Separator();
-        topSeparator.setOrientation(Orientation.HORIZONTAL);
-        final Separator botSeparator = new Separator();
-        topSeparator.setOrientation(Orientation.HORIZONTAL);
-
-        final VBox verticalBox = new VBox();
-        verticalBox.setSpacing(20);
-        verticalBox.setAlignment(Pos.CENTER);
+        VBox verticalContainer = new VBox();
+        verticalContainer.setSpacing(20);
+        verticalContainer.setAlignment(Pos.CENTER);
 
         final HBox horizontalBox = new HBox();
         horizontalBox.setSpacing(15);
         horizontalBox.setAlignment(Pos.CENTER);
 
-        final Separator leftSeperator = new Separator();
-        leftSeperator.setOrientation(Orientation.HORIZONTAL);
-        final Separator rightSeperator = new Separator();
-        rightSeperator.setOrientation(Orientation.HORIZONTAL);
 
+        quitButton = new Button();
+        quitButton.setPrefWidth(150);
+        quitButton.setPrefHeight(25);
+        quitButton.setText("OK");
+        quitButton.setVisible(false);
 
-        errorLabel = new Label();
-        errorLabel.setTextFill(Color.web("#ff0000"));
+        quitButton.setOnAction(new EventHandler<ActionEvent>()
+        {
+            @Override
+            public void handle(ActionEvent event) {
+                dialogStage.close();
+            }
+        });
+        infoLabel = new Label();
+        infoLabel.setVisible(false);
 
         textArea = new TextArea();
         textArea.setEditable(false);
-        textArea.setWrapText(true);
-
+       // textArea.setWrapText(true);
+        textArea.setCache(true);
         textArea.setMaxWidth(Double.MAX_VALUE);
         textArea.setMaxHeight(Double.MAX_VALUE);
+        textArea.setPrefWidth(800);
+
         GridPane.setVgrow(textArea, Priority.ALWAYS);
         GridPane.setHgrow(textArea, Priority.SOMETIMES);
 
@@ -79,12 +96,17 @@ public class ProgressForm {
        // expContent.add(label, 0, 0);
         expContent.add(textArea, 0, 1);
 
+        final HBox textAreaBox = new HBox();
+        textAreaBox.setSpacing(15);
+        textAreaBox.setAlignment(Pos.CENTER);
+        textAreaBox.getChildren().addAll(new Region(), expContent, new Region());
 
-        horizontalBox.getChildren().addAll(leftSeperator, progressBar, progressIndicator, rightSeperator);
 
-        verticalBox.getChildren().addAll(topSeparator, horizontalBox, errorLabel, botSeparator, expContent);
+        horizontalBox.getChildren().addAll(new Region(), progressBar, progressIndicator, new Region());
 
-        Scene scene = new Scene(verticalBox);
+        verticalContainer.getChildren().addAll(horizontalBox, infoLabel, textAreaBox, quitButton, new Region());
+
+        Scene scene = new Scene(verticalContainer);
         dialogStage.setScene(scene);
     }
 
@@ -97,16 +119,9 @@ public class ProgressForm {
         return dialogStage;
     }
 
-    public void AddInputToFeed(String inp)
+    void UpdateInputFeed(String text)
     {
-        inputFeed += inp + System.lineSeparator();
-        textArea.setText(inputFeed);
+        inputFeed += text + System.lineSeparator();
     }
 
-    public void ShowError(String err)
-    {
-        progressBar.setVisible(false);
-        progressIndicator.setVisible(false);
-        errorLabel.setText(err);
-    }
 }
