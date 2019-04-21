@@ -11,3 +11,8 @@ generate project files for Lina Engine and build them, or you can use this Launc
 ## Usage
 
 ![img](Docs/LauncherScreenshot.png)
+
+- Select the source directory. This is the directory of your Lina Engine source repo/clone/download.
+- Select the target directory (build directory) for the generated project files.
+- Select your generator.
+- Hit Generate Project Files to generate the project files, or Generate and Build to generate and build the binaries afterwards.
