@@ -30,6 +30,22 @@
                   <Glow />
                </effect>
             </ImageView>
+            <ImageView id="logoDynamic" blendMode="SRC_ATOP" disable="true" fitHeight="149.0" fitWidth="113.0" layoutX="161.0" layoutY="34.0" mouseTransparent="true" pickOnBounds="true" preserveRatio="true" visible="false">
+               <image>
+                  <Image url="@logo_dynamic.gif" />
+               </image>
+               <effect>
+                  <Glow />
+               </effect>
+            </ImageView>
+            <ImageView id="logoDynamic" blendMode="SRC_ATOP" disable="true" fitHeight="149.0" fitWidth="113.0" layoutX="160.0" layoutY="34.0" mouseTransparent="true" pickOnBounds="true" preserveRatio="true" visible="false">
+               <image>
+                  <Image url="@logo_chiptune.gif" />
+               </image>
+               <effect>
+                  <Glow />
+               </effect>
+            </ImageView>
             <Label layoutX="14.0" layoutY="545.0" text="Lina Engine Build Launcher v1.0.0" textFill="#b28484">
                <font>
                   <Font size="9.0" />
@@ -46,14 +62,6 @@
             <ImageView id="text_dynamic" blendMode="SRC_ATOP" fitHeight="98.0" fitWidth="297.0" layoutX="64.0" layoutY="208.0" mouseTransparent="true" pickOnBounds="true" preserveRatio="true">
                <image>
                   <Image url="@title_text_dynamic.gif" />
-               </image>
-               <effect>
-                  <Glow />
-               </effect>
-            </ImageView>
-            <ImageView id="logoDynamic" blendMode="SRC_ATOP" disable="true" fitHeight="149.0" fitWidth="113.0" layoutX="161.0" layoutY="34.0" mouseTransparent="true" pickOnBounds="true" preserveRatio="true" visible="false">
-               <image>
-                  <Image url="@logo_dynamic.gif" />
                </image>
                <effect>
                   <Glow />

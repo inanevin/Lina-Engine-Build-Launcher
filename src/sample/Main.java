@@ -44,6 +44,13 @@ class EnableDynamicLogo extends TimerTask
         targetTimer.schedule(new DisableDynamicLogo(staticImage, dynamicImage), 2 * 1000);
     }
 
+    @Override
+    public boolean cancel()
+    {
+        targetTimer.cancel();
+        return true;
+    }
+
     private ImageView staticImage;
     private ImageView dynamicImage;
     Timer targetTimer;
@@ -168,13 +175,10 @@ public class Main extends Application
         Button generateAndBuildButton;
         Button locateSourceButton;
         Button locateBuildButton;
-        Stage mainStage;
-        AnchorPane rootNode;
         CheckBox chiptuneCheckbox;
-
-        mainStage = primaryStage;
+        ImageView logoChiptune;
         Parent root = FXMLLoader.load(getClass().getResource("sample.fxml"));
-        rootNode = (AnchorPane) root;
+
 
         root.setOnMousePressed(new EventHandler<MouseEvent>()
         {
@@ -205,6 +209,8 @@ public class Main extends Application
         Hyperlink inanevinHyperlink = (Hyperlink) scene.lookup("#inanevinHyperlink");
         logoDynamic = (ImageView) scene.lookup("#logoDynamic");
         logoStatic = (ImageView) scene.lookup("#logoStatic");
+        logoChiptune = (ImageView)scene.lookup("#logoChiptune");
+
         generatorBox = (ComboBox<String>) scene.lookup("#generatorComboBox");
         optionsTable = (TableView) scene.lookup("#optionsTable");
         sourceField = (TextField) scene.lookup("#sourceField");
@@ -214,7 +220,6 @@ public class Main extends Application
         locateSourceButton = (Button) scene.lookup("#locateSourceButton");
         locateBuildButton = (Button) scene.lookup("#locateBuildButton");
         chiptuneCheckbox = (CheckBox)scene.lookup("#chiptuneCheckBox");
-
 
         //--------------------------------------------------------------------
         // MEDIA SETTINGS
@@ -309,27 +314,6 @@ public class Main extends Application
         });
 
 
-
-        //--------------------------------------------------------------------
-        // CHECKBOX SETTINGS
-        //--------------------------------------------------------------------
-
-        chiptuneCheckbox.selectedProperty().addListener(new ChangeListener<Boolean>()
-        {
-            @Override
-            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-                if(newValue)
-                {
-                    chiptuneCheckbox.setText("Chiptune Launcher Mode: Music by MUZYKA CZLOWIEKA");
-                    menuPlayer.play();
-                }
-                else
-                {
-                    chiptuneCheckbox.setText("Chiptune Launcher Mode");
-                    menuPlayer.pause();
-                }
-            }
-        });
         //--------------------------------------------------------------------
         // TEXTFIELD SETTINGS
         //--------------------------------------------------------------------
@@ -391,6 +375,32 @@ public class Main extends Application
         //--------------------------------------------------------------------
         logoTimer = new Timer(true);
         logoTimer.scheduleAtFixedRate(new EnableDynamicLogo(logoStatic, logoDynamic, logoTimer), logoChangeRate * 1000, logoChangeRate * 1000);
+
+        //--------------------------------------------------------------------
+        // CHECKBOX SETTINGS
+        //--------------------------------------------------------------------
+
+
+        chiptuneCheckbox.selectedProperty().addListener(new ChangeListener<Boolean>()
+        {
+            @Override
+            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+                if(newValue)
+                {
+                    chiptuneCheckbox.setText("Chiptune Launcher Mode: Music by MUZYKA CZLOWIEKA");
+                    menuPlayer.play();
+                    logoTimer.cancel();
+                }
+                else
+                {
+                    chiptuneCheckbox.setText("Chiptune Launcher Mode");
+                    logoChiptune.setVisible(false);
+                    logoDynamic.setVisible(false);
+                    logoStatic.setVisible(true);
+                    logoTimer.scheduleAtFixedRate(new EnableDynamicLogo(logoStatic, logoDynamic, logoTimer), logoChangeRate * 1000, logoChangeRate * 1000);
+                }
+            }
+        });
     }
 
 
