@@ -2,38 +2,38 @@ package sample;
 
 import javafx.beans.property.*;
 
-public class BuildOption<T> {
+public class BuildOption {
 
-    private final StringProperty firstName;
-    private final ObjectProperty<T> particularValue;
+    private final StringProperty FirstName;
+    private final ObjectProperty ParticularValue;
 
-    public BuildOption( String id, T val ) {
-        this.firstName = new SimpleStringProperty(id);
-        this.particularValue = new SimpleObjectProperty<T>(val);
+    public BuildOption( String id, Object val ) {
+        this.FirstName = new SimpleStringProperty(id);
+        this.ParticularValue = new SimpleObjectProperty(val);
     }
 
     public String getFirstName() {
-        return firstName.get();
+        return FirstName.get();
     }
 
     public void setFirstName(String firstName) {
-        this.firstName.set(firstName);
+        this.FirstName.set(firstName);
     }
 
     public StringProperty firstNameProperty() {
-        return firstName;
+        return FirstName;
     }
 
-    public T getParticularValue() {
-        return particularValue.get();
+    public Object getParticularValue() {
+        return ParticularValue.get();
     }
 
-    public void setParticularValue(T particularValue) {
-        this.particularValue.set(particularValue);
+    public void setParticularValue(Object particularValue) {
+        this.ParticularValue.set(particularValue);
     }
 
-    public ObjectProperty<T> particularValueProperty() {
-        return particularValue;
+    public ObjectProperty particularValueProperty() {
+        return ParticularValue;
     }
 
 }

@@ -1,6 +1,7 @@
 package sample;
 
 import javafx.application.Application;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
@@ -8,6 +9,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
@@ -272,10 +274,11 @@ public class Main extends Application
 
         // Create & set data.
         ObservableList<Pair<String, Object>> data = FXCollections.observableArrayList(
-                pair("CMAKE_CONFIGURATION_TYPES", "Debug;Release;MinSizeRel;RelWithDebInfo;"),
-                pair("LINA_BUILD_SANDBOX", true),
-                pair("LINA_ENABLE_LOGGING", true)
+        pair("CMAKE_CONFIGURATION_TYPES", "Debug;Release;MinSizeRel;RelWithDebInfo;"),
+                pair("LINA_BUILD_SANDBOX", false),
+                pair("LINA_ENABLE_LOGGING",  true)
         );
+
         optionsTable.getItems().setAll(data);
 
         // Set columns
@@ -284,11 +287,12 @@ public class Main extends Application
         TableColumn<Pair<String, Object>, Object> valueColumn = new TableColumn<>("VALUE");
         valueColumn.setSortable(false);
         valueColumn.setPrefWidth(150);
+
         nameColumn.setCellValueFactory(new PairKeyFactory());
         valueColumn.setCellValueFactory(new PairValueFactory());
-        optionsTable.getColumns().setAll(nameColumn, valueColumn);
-        valueColumn.setCellFactory(new Callback<TableColumn<Pair<String, Object>, Object>, TableCell<Pair<String, Object>, Object>>()
-        {
+
+       optionsTable.getColumns().setAll(nameColumn, valueColumn);
+        valueColumn.setCellFactory(new Callback<TableColumn<Pair<String, Object>, Object>, TableCell<Pair<String, Object>, Object>>() {
             @Override
             public TableCell<Pair<String, Object>, Object> call(TableColumn<Pair<String, Object>, Object> column) {
                 return new PairValueCell();
@@ -397,28 +401,29 @@ public class Main extends Application
         String optionsString = "";
 
         // Get item list from the options table & an iterator for it.
-        ObservableList<Pair<String, Object>> items = optionsTable.getItems();
-        Iterator<Pair<String, Object>> it = items.iterator();
+       /* ObservableList<BuildOption> items = optionsTable.getItems();
+        Iterator<BuildOption> it = items.iterator();
 
         // Iterate all the items.
         while (it.hasNext())
         {
 
             // Item & strings dec.
-            Pair<String, Object> row = it.next();
+            BuildOption row = it.next();
             String typeString = "";
             String valueString = "";
 
             // Check item type and set type string as well as the value string accordingly.
-            if (row.getValue() instanceof String)
+            if (row.getParticularValue() instanceof String)
             {
                 typeString = "STRING";
-                valueString = row.getValue().toString();
+                valueString = row.getParticularValue().toString();
             }
-            else if (row.getValue() instanceof Boolean)
+            else if (row.getParticularValue() instanceof Boolean)
             {
                 typeString = "BOOL";
-                if ((boolean) row.getValue())
+                BuildOption boolRow = (BuildOption) row;
+                if ((boolean) boolRow.getParticularValue())
                 {
                     valueString = "ON";
                 }
@@ -429,14 +434,14 @@ public class Main extends Application
             }
 
             // Increment option string.
-            optionsString += "-D" + row.getKey() + ":" + typeString + "=" + valueString + " ";
+            optionsString += "-D" + row.getFirstName() + ":" + typeString + "=" + valueString + " ";
 
         }
 
         // Concat the command for generating project files.
         String projectFileGenerateCommand = "cmake " + optionsString + generatorString + " " + sourceField.getText();
-
-
+        System.out.println(projectFileGenerateCommand);
+*/
         if (buildAsWell)
         {
 
@@ -526,6 +531,15 @@ public class Main extends Application
         }
     }
 
+    public static void OptionTableItemEdited(int itemIndex, boolean value)
+    {
+        System.out.println("Index: " + itemIndex + "Value: " + Boolean.toString(value));
+    }
+
+    public static void OptionTableItemEdited(int itemIndex, String value)
+    {
+        System.out.println("Index: " + itemIndex + "Value: " + value);
+    }
 
     public static void main(String[] args) {
         launch(args);
