@@ -16,6 +16,8 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
 import javafx.scene.paint.Color;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
@@ -23,7 +25,6 @@ import javafx.stage.StageStyle;
 import javafx.event.ActionEvent;
 import javafx.util.Callback;
 import javafx.util.Pair;
-
 import java.io.*;
 import java.util.*;
 
@@ -75,18 +76,11 @@ public class Main extends Application
     private int logoChangeRate = 5;
     private String sourceDirectoryIdentifier = "#linaenginebuildlauncherentrypointv100";
 
-    private ImageView logoDynamic;
-    private ImageView logoStatic;
-    private Timer logoTimer;
+
+
     private TextField sourceField, buildField;
     private ComboBox<String> generatorBox;
     private TableView<Pair<String, Object>> optionsTable = new TableView<>();
-    private Button generateButton;
-    private Button generateAndBuildButton;
-    private Button locateSourceButton;
-    private Button locateBuildButton;
-    private Stage mainStage;
-    private AnchorPane rootNode;
     private ProgressForm currentProgressForm;
     private boolean runBuildCommandAfter;
 
@@ -167,6 +161,17 @@ public class Main extends Application
         // ROOT SETTINGS
         //--------------------------------------------------------------------
 
+        ImageView logoDynamic;
+        ImageView logoStatic;
+        Timer logoTimer;
+        Button generateButton;
+        Button generateAndBuildButton;
+        Button locateSourceButton;
+        Button locateBuildButton;
+        Stage mainStage;
+        AnchorPane rootNode;
+        CheckBox chiptuneCheckbox;
+
         mainStage = primaryStage;
         Parent root = FXMLLoader.load(getClass().getResource("sample.fxml"));
         rootNode = (AnchorPane) root;
@@ -208,6 +213,14 @@ public class Main extends Application
         generateAndBuildButton = (Button) scene.lookup("#generateAndBuildButton");
         locateSourceButton = (Button) scene.lookup("#locateSourceButton");
         locateBuildButton = (Button) scene.lookup("#locateBuildButton");
+        chiptuneCheckbox = (CheckBox)scene.lookup("#chiptuneCheckBox");
+
+
+        //--------------------------------------------------------------------
+        // MEDIA SETTINGS
+        //--------------------------------------------------------------------
+        Media menuMusic = new Media(getClass().getResource("chiptune.mp3").toString());
+        MediaPlayer menuPlayer = new MediaPlayer(menuMusic);
 
         //--------------------------------------------------------------------
         // BUTTON CALLBACKS
@@ -295,6 +308,28 @@ public class Main extends Application
             }
         });
 
+
+
+        //--------------------------------------------------------------------
+        // CHECKBOX SETTINGS
+        //--------------------------------------------------------------------
+
+        chiptuneCheckbox.selectedProperty().addListener(new ChangeListener<Boolean>()
+        {
+            @Override
+            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+                if(newValue)
+                {
+                    chiptuneCheckbox.setText("Chiptune Launcher Mode: Music by MUZYKA CZLOWIEKA");
+                    menuPlayer.play();
+                }
+                else
+                {
+                    chiptuneCheckbox.setText("Chiptune Launcher Mode");
+                    menuPlayer.pause();
+                }
+            }
+        });
         //--------------------------------------------------------------------
         // TEXTFIELD SETTINGS
         //--------------------------------------------------------------------
@@ -357,6 +392,7 @@ public class Main extends Application
         logoTimer = new Timer(true);
         logoTimer.scheduleAtFixedRate(new EnableDynamicLogo(logoStatic, logoDynamic, logoTimer), logoChangeRate * 1000, logoChangeRate * 1000);
     }
+
 
     void GenerateProjectFiles(boolean buildAsWell) {
 
