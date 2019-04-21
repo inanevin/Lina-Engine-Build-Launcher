@@ -257,7 +257,7 @@ public class Main extends Application
                 if (selectedDirectory != null)
                 {
                     buildField.setText(selectedDirectory.getAbsolutePath());
-                    Utility.userData.setLastSourceDir(selectedDirectory.getAbsolutePath());
+                    Utility.userData.setLastBuildDir(selectedDirectory.getAbsolutePath());
                     Utility.WriteUserData();
                 }
             }
@@ -291,7 +291,7 @@ public class Main extends Application
         //--------------------------------------------------------------------
         // TEXTFIELD SETTINGS
         //--------------------------------------------------------------------
-        if(Utility.userData == null) Utility.userData = new UserData();
+        if (Utility.userData == null) Utility.userData = new UserData();
 
         String lastSourceDirectory = Utility.userData.getLastSourceDir();
         String lastBuildDirectory = Utility.userData.getLastBuildDir();
@@ -373,6 +373,7 @@ public class Main extends Application
             return;
         }
 
+
         //--------------------------------------------------------------------
         // CHECK IF SOURCE FIELD IS VALID
         //--------------------------------------------------------------------
@@ -394,9 +395,45 @@ public class Main extends Application
             return;
         }
 
+
         //--------------------------------------------------------------------
         // CHECK IF BUILD DIRECTORY IS VALID
         //--------------------------------------------------------------------
+
+        if (!new File(buildField.getText()).exists())
+        {
+            // Create alert
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+
+            // Set alert icon.
+            Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+            stage.getIcons().add(new Image(getClass().getResource("logo_static.png").toString()));
+
+            // Configure alert.
+            alert.setTitle("Warning about Build Directory!");
+            alert.setHeaderText(null);
+            alert.setContentText("Build directory does not exist. Do you want to create it then build?");
+
+            // Create alert buttons.
+            ButtonType continueButton = new ButtonType("Create Directory");
+            ButtonType cancelButton = new ButtonType("Cancel");
+
+            // Set buttons & show alert.
+            alert.getButtonTypes().setAll(continueButton, cancelButton);
+            Optional<ButtonType> result = alert.showAndWait();
+
+            // Check button click result.
+            if (result.get() == cancelButton)
+            {
+                return;
+            }
+            else if (result.get() == continueButton)
+            {
+                ShellCommand("md " + "\"" +buildField.getText() + "\"", "");
+            }
+
+        }
+
         String isBuildDirectoryValid = IsBuildDirectoryValid();
         if (!isBuildDirectoryValid.equals(""))
         {
@@ -426,6 +463,7 @@ public class Main extends Application
                 return;
             }
         }
+
 
         //--------------------------------------------------------------------
         // CMAKE COMMAND GENERATION
@@ -476,47 +514,69 @@ public class Main extends Application
         // Concat the command for generating project files.
         String projectFileGenerateCommand = "cmake " + optionsString + generatorString + " " + sourceField.getText();
 
-        ShellCommand(projectFileGenerateCommand);
+        ShellCommand(projectFileGenerateCommand, buildField.getText());
         if (buildAsWell)
         {
 
         }
     }
 
-    void ShellCommand(String command)
+    void ShellCommand(String command, String dir)
     {
-      /*  boolean isWindows = System.getProperty("os.name")
+
+        ProcessBuilder processBuilder = new ProcessBuilder();
+
+        boolean isWindows = System.getProperty("os.name")
                 .toLowerCase().startsWith("windows");
 
-        ProcessBuilder builder = new ProcessBuilder();
+        /*if (isWindows) {
+            processBuilder.command("cmd.exe", "/" + command + "dir " + buildField.getText());
+        } else {
+            processBuilder.command("bash -" + command + " ls " + buildField.getText());
+        }*/
+
         if (isWindows)
         {
-            builder.command("cmd.exe", command, "dir");
+            processBuilder.command("cmd.exe", "/c", command);
+            if (!dir.equals(""))
+            {
+                processBuilder.directory(new File(dir));
+            }
         }
         else
         {
-            builder.command("sh", "-c", "ls");
+            processBuilder.command("bash -" + command + " ls " + buildField.getText());
         }
-        builder.directory(new File(buildField.getText()));
+
         try
         {
-            Process process = builder.start();
-            StreamGobbler streamGobbler =
-                    new StreamGobbler(process.getInputStream(), System.out::println);
-            Executors.newSingleThreadExecutor().submit(streamGobbler);
+
+            Process process = processBuilder.start();
+
+            // blocked :(
+            BufferedReader reader =
+                    new BufferedReader(new InputStreamReader(process.getInputStream()));
+
+            String line;
+            while ((line = reader.readLine()) != null)
+            {
+                System.out.println(line);
+            }
+
             int exitCode = process.waitFor();
-            assert exitCode == 0;
+            System.out.println("\nExited with error code : " + exitCode);
+
         }
         catch (IOException e)
         {
-
+            e.printStackTrace();
         }
         catch (InterruptedException e)
         {
+            e.printStackTrace();
+        }
 
-        }*/
-
-        try {
+        /*try {
             String s = null;
 
             // run the Unix "ps -ef" command
@@ -541,13 +601,13 @@ public class Main extends Application
                 System.out.println(s);
             }
 
-            System.exit(0);
+            System.out.println("heeeey");
         }
         catch (IOException e) {
             System.out.println("exception happened - here's what I know: ");
             e.printStackTrace();
             System.exit(-1);
-        }
+        }*/
 
     }
 
@@ -557,8 +617,9 @@ public class Main extends Application
         // VALIDATE BUILD DIRECTORY
         //--------------------------------------------------------------------
 
-        // Check FOR CMakeCache.txt file in the build directory.
+        // Check for CMakeCache.txt file in the build directory.
         File dir = new File(buildField.getText());
+
         File[] matches = dir.listFiles(new FilenameFilter()
         {
             @Override
