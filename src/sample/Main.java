@@ -4,8 +4,11 @@ import javafx.application.Application;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
+import javafx.concurrent.WorkerStateEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -13,6 +16,9 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
@@ -69,7 +75,7 @@ class DisableDynamicLogo extends TimerTask
 public class Main extends Application
 {
 
-
+    private final String errorLogFile = "error_log.txt";
     private double sceneXOffset;
     private double sceneYOffset;
     private int logoChangeRate = 5;
@@ -91,7 +97,7 @@ public class Main extends Application
     }
 
     static ObservableList<Pair<String, Object>> data = FXCollections.observableArrayList(
-            pair("CMAKE_CONFIGURATION_TYPES", "Debug;Release;MinSizeRel;RelWithDebInfo;"),
+            //pair("CMAKE_CONFIGURATION_TYPES", "Debug;Release;MinSizeRel;RelWithDebInfo;"),
             pair("LINA_BUILD_SANDBOX", false),
             pair("LINA_ENABLE_LOGGING", true)
     );
@@ -100,7 +106,7 @@ public class Main extends Application
 
     String generators[] =
             {
-                    "Visual Studio 15 2017",
+                    "Visual Studio 15 201sd7",
                     "Visual Studio 15 2017 ARM",
                     "Visual Studio 15 2017 Win64",
                     "Visual Studio 14 2015",
@@ -380,6 +386,8 @@ public class Main extends Application
         String isSourceDirectoryValid = IsSourceDirectoryValid();
         if (!isSourceDirectoryValid.equals(""))
         {
+            if(isSourceDirectoryValid.equals("-1")) return;
+
             // Create alert
             Alert alert = new Alert(Alert.AlertType.ERROR);
 
@@ -434,7 +442,7 @@ public class Main extends Application
 
                 if (isWindows)
                 {
-                    ShellCommand("md " + "\"" +buildField.getText() + "\"", "");
+                    ShellCommand("md " + "\"" + buildField.getText() + "\"", "");
 
                 }
                 else
@@ -535,85 +543,93 @@ public class Main extends Application
 
     void ShellCommand(String command, String dir)
     {
+        //--------------------------------------------------------------------
+        // EXECUTE COMMAND
+        //--------------------------------------------------------------------
 
+        // Get process
         ProcessBuilder processBuilder = new ProcessBuilder();
 
         boolean isWindows = System.getProperty("os.name")
                 .toLowerCase().startsWith("windows");
 
+        // Feed command & dir.
         if (isWindows)
-        {
             processBuilder.command("cmd.exe", "/c", command);
-
-        }
         else
-        {
-            processBuilder.command("bash", "-c", command );
-        }
+            processBuilder.command("bash", "-c", command);
         if (!dir.equals(""))
-        {
             processBuilder.directory(new File(dir));
-        }
+
+        System.out.println(command);
+
+        File errFile = new File(errorLogFile);
+        processBuilder.redirectError(errFile);
+        // Run
         try
         {
 
+
             Process process = processBuilder.start();
 
-            // blocked :(
             BufferedReader reader =
                     new BufferedReader(new InputStreamReader(process.getInputStream()));
 
+
+           /* ProgressForm pForm = new ProgressForm();
+
+
+            CommandTask task = new CommandTask();
+
+            pForm.activateProgressBar(task);
+            pForm.getDialogStage().show();
+
+
+            //Thread thread = new Thread(task);
+            //thread.start();
+
+
+            String line;
+            int lineSize = (int) reader.lines().count();
+            int lineCounter = 0;
+*/
             String line;
             while ((line = reader.readLine()) != null)
             {
+                //task.m_Progress = lineCounter;
+                //lineCounter++;
                 System.out.println(line);
             }
 
             int exitCode = process.waitFor();
+
+            if(exitCode == 1)
+            {
+                // Get buffer & read.
+                BufferedReader errReader = new BufferedReader(new FileReader(errFile));
+                String errLine = "";
+
+                String allLines = "";
+
+                while((errLine = errReader.readLine()) != null)
+                {
+                    allLines += errLine + System.lineSeparator();
+                }
+
+                ShowExceptionDialog(allLines, "Error while generating project files!");
+            }
             System.out.println("\nExited with error code : " + exitCode);
 
         }
         catch (IOException e)
         {
-            e.printStackTrace();
+            ShowExceptionDialog(e, "IO Exception!");
         }
         catch (InterruptedException e)
         {
-            e.printStackTrace();
+            ShowExceptionDialog(e, "Interrupted Exception!");
         }
 
-        /*try {
-            String s = null;
-
-            // run the Unix "ps -ef" command
-            // using the Runtime exec method:
-            Process p = Runtime.getRuntime().exec(command);
-
-            BufferedReader stdInput = new BufferedReader(new
-                    InputStreamReader(p.getInputStream()));
-
-            BufferedReader stdError = new BufferedReader(new
-                    InputStreamReader(p.getErrorStream()));
-
-            // read the output from the command
-            System.out.println("Here is the standard output of the command:\n");
-            while ((s = stdInput.readLine()) != null) {
-                System.out.println(s);
-            }
-
-            // read any errors from the attempted command
-            System.out.println("Here is the standard error of the command (if any):\n");
-            while ((s = stdError.readLine()) != null) {
-                System.out.println(s);
-            }
-
-            System.out.println("heeeey");
-        }
-        catch (IOException e) {
-            System.out.println("exception happened - here's what I know: ");
-            e.printStackTrace();
-            System.exit(-1);
-        }*/
 
     }
 
@@ -693,12 +709,81 @@ public class Main extends Application
         }
         catch (FileNotFoundException e)
         {
-            return e.getMessage();
+            ShowExceptionDialog(e, "File not found exception!");
+            return "-1";
         }
         catch (IOException e)
         {
-            return e.getMessage();
+            ShowExceptionDialog(e, "IO Exception!");
+            return "-1";
         }
+
+
+    }
+
+    void ShowExceptionDialog(Exception e, String contentMsg)
+    {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Exception Occured!");
+        alert.setHeaderText(null);
+        alert.setContentText(contentMsg);
+
+
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        e.printStackTrace(pw);
+        String exceptionText = sw.toString();
+
+        Label label = new Label("The exception stacktrace was:");
+
+        TextArea textArea = new TextArea(exceptionText);
+        textArea.setEditable(false);
+        textArea.setWrapText(true);
+
+
+        textArea.setMaxWidth(Double.MAX_VALUE);
+        textArea.setMaxHeight(Double.MAX_VALUE);
+        GridPane.setVgrow(textArea, Priority.ALWAYS);
+        GridPane.setHgrow(textArea, Priority.ALWAYS);
+
+        GridPane expContent = new GridPane();
+        expContent.setMaxWidth(Double.MAX_VALUE);
+        expContent.add(label, 0, 0);
+        expContent.add(textArea, 0, 1);
+
+        alert.getDialogPane().setContent(expContent);
+        alert.showAndWait();
+    }
+
+
+    void ShowExceptionDialog(String err, String contentMsg)
+    {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Error Occured!");
+        alert.setHeaderText(null);
+        alert.setContentText(contentMsg);
+
+
+        String exceptionText = err;
+
+        Label label = new Label("The error log was:");
+
+        TextArea textArea = new TextArea(exceptionText);
+        textArea.setEditable(false);
+        textArea.setWrapText(true);
+
+        textArea.setMaxWidth(Double.MAX_VALUE);
+        textArea.setMaxHeight(Double.MAX_VALUE);
+        GridPane.setVgrow(textArea, Priority.ALWAYS);
+        GridPane.setHgrow(textArea, Priority.ALWAYS);
+
+        GridPane expContent = new GridPane();
+        expContent.setMaxWidth(Double.MAX_VALUE);
+        expContent.add(label, 0, 0);
+        expContent.add(textArea, 0, 1);
+
+        alert.getDialogPane().setContent(expContent);
+        alert.showAndWait();
     }
 
     public static void OptionTableItemEdited(int itemIndex, boolean value)
