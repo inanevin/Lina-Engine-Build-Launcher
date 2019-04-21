@@ -41,6 +41,8 @@ public class ProgressForm {
         return quitButton;
     }
 
+    public void SetInputFeed(String f) { inputFeed = f;}
+
 
     public String GetInputFeed() { return inputFeed;}
     public TextArea GetTextArea() { return textArea; }

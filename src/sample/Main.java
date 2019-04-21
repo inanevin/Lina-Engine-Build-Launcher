@@ -2,6 +2,8 @@ package sample;
 
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
@@ -86,6 +88,7 @@ public class Main extends Application
     private Stage mainStage;
     private AnchorPane rootNode;
     private ProgressForm currentProgressForm;
+    private boolean runBuildCommandAfter;
 
     private static Pair<String, Object> pair(String name, Object value) {
         return new Pair<>(name, value);
@@ -529,14 +532,12 @@ public class Main extends Application
 
         }
 
+        runBuildCommandAfter = buildAsWell;
         // Concat the command for generating project files.
         String projectFileGenerateCommand = "cmake " + optionsString + generatorString + " " + sourceField.getText();
-
         ShellCommand(projectFileGenerateCommand, buildField.getText(), true);
-        if (buildAsWell)
-        {
 
-        }
+
     }
 
 
@@ -578,6 +579,13 @@ public class Main extends Application
             progressForm.activate();
             currentProgressForm = progressForm;
 
+           /* currentProgressForm.GetTextArea().textProperty().addListener(new ChangeListener<String>()
+            {
+                @Override
+                public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+
+                }
+            });*/
 
             Process process = null;
             // In real life this task would do something useful and return
@@ -592,10 +600,6 @@ public class Main extends Application
                 }
             };
 
-            task.setOnSucceeded(event -> {
-
-            });
-
             Thread thread = new Thread(task);
             thread.start();
         }
@@ -603,8 +607,6 @@ public class Main extends Application
         {
             ShellCommandTask(processBuilder);
         }
-
-
     }
 
     String IsBuildDirectoryValid() {
@@ -769,6 +771,7 @@ public class Main extends Application
         buildOptionList.get(itemIndex).setParticularValue(value);
     }
 
+
     void ShellCommandTask(ProcessBuilder processBuilder)
     {
         // Run
@@ -781,37 +784,29 @@ public class Main extends Application
 
 
             String line;
-            //int lineSize = (int) reader.lines().count();
-            //int lineCounter = 0;
 
             while ((line = reader.readLine()) != null)
             {
-                //lineCounter++;
                 System.out.println(line);
-                //updateProgress(lineCounter, 100);
             }
-
-            //updateProgress(lineSize, lineSize);
 
             int exitCode = process.waitFor();
 
-                    /*if(exitCode == 1)
-                    {
-                        // Get buffer & read.
-                        BufferedReader errReader = new BufferedReader(new FileReader(errFile));
-                        String errLine = "";
+            if (exitCode == 1)
+            {
+                // Get buffer & read.
+                BufferedReader errReader = new BufferedReader(new FileReader(errorLogFile));
 
-                        String allLines = "";
+                String errLine = "";
+                String allLines = "";
 
-                        while((errLine = errReader.readLine()) != null)
-                        {
-                            allLines += errLine + System.lineSeparator();
-                        }
+                while ((errLine = errReader.readLine()) != null)
+                {
+                    allLines += errLine + System.lineSeparator();
+                }
 
-                        ShowExceptionDialog(allLines, "Error while generating project files!");
-                    }*/
-            System.out.println("\nExited with error code : " + exitCode);
-
+                ShowExceptionDialog(allLines, "Error while generating project files!");
+            }
         }
         catch (IOException e)
         {
@@ -825,26 +820,34 @@ public class Main extends Application
 
     void ShellCommandTask(ProcessBuilder processBuilder, ProgressForm progressForm)
     {
-
-
         // Run
         try
         {
-            Process process  = processBuilder.start();
+            Process process = processBuilder.start();
+
             BufferedReader reader =
                     new BufferedReader(new InputStreamReader(process.getInputStream()));
 
+            StreamGobbler errorGobbler = new StreamGobbler(process.getErrorStream(), this, progressForm);
+
+
+            StreamGobbler outputGobbler = new StreamGobbler(process.getInputStream(), this, progressForm);
+
+
+            outputGobbler.start();
+            errorGobbler.start();
 
             String line;
             String temp;
 
             String appended = "";
 
-            while ((line = reader.readLine()) != null)
+           /* while ((line = reader.readLine()) != null)
             {
                 progressForm.UpdateInputFeed(line);
 
-                Platform.runLater(new Runnable() {
+                Platform.runLater(new Runnable()
+                {
                     @Override
                     public void run() {
                         UpdateTextArea();
@@ -852,7 +855,7 @@ public class Main extends Application
                 });
 
                 System.out.println(line);
-            }
+            }*/
 
 
             int exitCode = process.waitFor();
@@ -868,7 +871,8 @@ public class Main extends Application
                 while ((errLine = errReader.readLine()) != null)
                 {
                     progressForm.UpdateInputFeed(errLine);
-                    Platform.runLater(new Runnable() {
+                    Platform.runLater(new Runnable()
+                    {
                         @Override
                         public void run() {
                             UpdateTextArea();
@@ -876,7 +880,8 @@ public class Main extends Application
                     });
                 }
 
-                Platform.runLater(new Runnable() {
+                Platform.runLater(new Runnable()
+                {
                     @Override
                     public void run() {
                         ShowErrorOnProgress();
@@ -886,15 +891,15 @@ public class Main extends Application
             }
             else
             {
-                Platform.runLater(new Runnable() {
+                Platform.runLater(new Runnable()
+                {
                     @Override
                     public void run() {
                         ShowSuccessOnProgress();
+                        ProgressCommandSuccessful();
                     }
                 });
             }
-            System.out.println("\nExited with error code : " + exitCode);
-
         }
         catch (IOException e)
         {
@@ -908,17 +913,24 @@ public class Main extends Application
 
     void UpdateTextArea()
     {
-        currentProgressForm.GetTextArea().appendText(currentProgressForm.GetInputFeed());
+        currentProgressForm.GetTextArea().setText(currentProgressForm.GetInputFeed());
+        currentProgressForm.GetTextArea().setScrollTop(Double.MAX_VALUE);
+        ///currentProgressForm.SetInputFeed("");
     }
 
     void ShowErrorOnProgress()
     {
+
+
         currentProgressForm.getInfoLabel().setVisible(true);
         currentProgressForm.getProgressBar().setVisible(false);
         currentProgressForm.getProgressIndicator().setVisible(false);
         currentProgressForm.getQuitButton().setVisible(true);
         currentProgressForm.getInfoLabel().setText("Error on Progress");
         currentProgressForm.getInfoLabel().setTextFill(Color.web("#ff0000"));
+
+
+
     }
 
     void ShowSuccessOnProgress()
@@ -931,6 +943,21 @@ public class Main extends Application
         currentProgressForm.getInfoLabel().setTextFill(Color.web("#00ff00"));
     }
 
+    void CloseCurrentProgressForm()
+    {
+        currentProgressForm.getDialogStage().close();
+    }
+    void ProgressCommandSuccessful()
+    {
+        if(runBuildCommandAfter)
+        {
+            runBuildCommandAfter = false;
+            CloseCurrentProgressForm();
+            // Concat the command for generating project files.
+            String projectFileGenerateCommand = "cmake --build .";
+            ShellCommand(projectFileGenerateCommand, buildField.getText(), true);
+        }
+    }
     public static void main(String[] args) {
         launch(args);
     }
