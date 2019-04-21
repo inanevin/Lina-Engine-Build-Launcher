@@ -1,5 +1,7 @@
 package sample;
 
+import javafx.animation.Interpolator;
+import javafx.animation.TranslateTransition;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -24,6 +26,7 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.event.ActionEvent;
 import javafx.util.Callback;
+import javafx.util.Duration;
 import javafx.util.Pair;
 import java.io.*;
 import java.util.*;
@@ -170,7 +173,7 @@ public class Main extends Application
 
         ImageView logoDynamic;
         ImageView logoStatic;
-
+        ImageView inanEvinGif;
         Button exit;
         Button generateButton;
         Button generateAndBuildButton;
@@ -221,6 +224,7 @@ public class Main extends Application
         locateBuildButton = (Button) scene.lookup("#locateBuildButton");
         chiptuneCheckbox = (CheckBox)scene.lookup("#chiptuneCheckBox");
         exit = (Button)scene.lookup("#exitButton");
+        inanEvinGif = (ImageView)scene.lookup("#inanevingif");
 
         //--------------------------------------------------------------------
         // MEDIA SETTINGS
@@ -388,7 +392,7 @@ public class Main extends Application
         // CHECKBOX SETTINGS
         //--------------------------------------------------------------------
 
-
+        TranslateTransition translation = new TranslateTransition();
         chiptuneCheckbox.selectedProperty().addListener(new ChangeListener<Boolean>()
         {
             @Override
@@ -401,10 +405,22 @@ public class Main extends Application
                     logoChiptune.setVisible(true);
                     logoDynamic.setVisible(false);
                     logoStatic.setVisible(false);
-                    System.out.println(logoChiptune.isVisible());
+                    inanEvinGif.setVisible(true);
+
+
+                    translation.setFromX(-110);
+                    translation.setToX(110);
+                    translation.setAutoReverse(true);
+                    translation.setCycleCount(100);
+                    translation.setDuration(Duration.millis(5000));
+                    translation.setInterpolator(Interpolator.EASE_BOTH);
+                    translation.setNode(inanEvinGif);
+                    translation.play();
                 }
                 else
                 {
+                    translation.stop();
+                    inanEvinGif.setVisible(false);
                     menuPlayer.pause();
                     chiptuneCheckbox.setText("Chiptune Launcher Mode");
                     logoChiptune.setVisible(false);
@@ -430,7 +446,7 @@ public class Main extends Application
 
             // Set alert icon
             Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
-            stage.getIcons().add(new Image(getClass().getResource("logo_static.png").toString()));
+            stage.getIcons().add(new Image(getClass().getResource("logo_small_static.png").toString()));
 
             // Configure alert & show.
             alert.setTitle("Error on  Build Directory!");
@@ -454,7 +470,7 @@ public class Main extends Application
 
             // Set alert icon.
             Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
-            stage.getIcons().add(new Image(getClass().getResource("logo_static.png").toString()));
+            stage.getIcons().add(new Image(getClass().getResource("logo_small_static.png").toString()));
 
             // Configura alert & show.
             alert.setTitle("Error on Source Directory!");
@@ -476,7 +492,7 @@ public class Main extends Application
 
             // Set alert icon.
             Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
-            stage.getIcons().add(new Image(getClass().getResource("logo_static.png").toString()));
+            stage.getIcons().add(new Image(getClass().getResource("logo_small_static.png").toString()));
 
             // Configure alert.
             alert.setTitle("Warning about Build Directory!");
@@ -527,7 +543,7 @@ public class Main extends Application
 
             // Set alert icon.
             Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
-            stage.getIcons().add(new Image(getClass().getResource("logo_static.png").toString()));
+            stage.getIcons().add(new Image(getClass().getResource("logo_small_static.png").toString()));
 
             // Configure alert.
             alert.setTitle("Warning about Build Directory!");

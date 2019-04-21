@@ -111,7 +111,7 @@ public class ProgressForm {
 
         horizontalBox.getChildren().addAll(new Region(), progressBar, progressIndicator, new Region());
 
-        verticalContainer.getChildren().addAll(horizontalBox, infoLabel, textAreaBox, quitButton, new Region());
+        verticalContainer.getChildren().addAll(new Region(), horizontalBox, infoLabel, textAreaBox, quitButton, new Region());
 
         Scene scene = new Scene(verticalContainer);
         dialogStage.setScene(scene);

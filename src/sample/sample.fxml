@@ -76,12 +76,9 @@
                   <Font size="9.0" />
                </font>
             </CheckBox>
-            <ImageView id="logoChiptune" blendMode="SRC_ATOP" disable="true" fitHeight="173.0" fitWidth="132.0" layoutX="148.0" layoutY="34.0" mouseTransparent="true" pickOnBounds="true" preserveRatio="true" visible="false">
-               <effect>
-                  <Glow />
-               </effect>
+            <ImageView id="logoChiptune" blendMode="SRC_ATOP" disable="true" fitHeight="177.0" fitWidth="132.0" layoutX="153.0" layoutY="22.0" mouseTransparent="true" pickOnBounds="true" preserveRatio="true" visible="false">
                <image>
-                  <Image url="@logo_dynamic_moving.gif" />
+                  <Image url="@logo_small_chiptune.gif" />
                </image>
             </ImageView>
          </children>
@@ -168,6 +165,11 @@
          <columnResizePolicy>
             <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
          </columnResizePolicy></TableView>
+      <ImageView id="inanevingif" fitHeight="13.0" fitWidth="219.0" layoutX="650.0" layoutY="230.0" pickOnBounds="true" preserveRatio="true" visible="false">
+         <image>
+            <Image url="@inanevincom.gif" />
+         </image>
+      </ImageView>
       <Label layoutX="452.0" layoutY="307.0" prefHeight="23.0" prefWidth="263.0" text="( specify the target IDE to generate the project files for )" textFill="#9e868b">
          <font>
             <Font name="Corbel" size="11.0" />
