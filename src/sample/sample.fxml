@@ -39,11 +39,11 @@
                   <BoxBlur height="2.0" width="2.0" />
                </effect>
             </ImageView>
-            <Label layoutX="21.0" layoutY="552.0" text="Lina Engine Build Launcher v1.0.0" textFill="#b28484">
+            <Label layoutX="14.0" layoutY="540.0" prefHeight="6.0" prefWidth="132.0" text="Lina Engine Build Launcher v1.0.0" textFill="#b28484">
                <font>
                   <Font size="9.0" />
                </font></Label>
-            <Label layoutX="289.0" layoutY="526.0" text="Copyright (C) 2019 Inan Evin" textFill="#b28484">
+            <Label layoutX="288.0" layoutY="515.0" text="Copyright (C) 2019 Inan Evin" textFill="#b28484">
                <font>
                   <Font size="9.0" />
                </font></Label>
@@ -70,8 +70,8 @@
                   <Font size="11.0" />
                </font>
             </Label>
-            <Hyperlink id="inanevinHyperlink" layoutX="296.0" layoutY="547.0" text="www.inanevin.com" textAlignment="RIGHT" underline="true" />
-            <CheckBox id="chiptuneCheckBox" layoutX="21.0" layoutY="526.0" mnemonicParsing="false" text="Chiptune Launcher Mode" textFill="#b28484">
+            <Hyperlink id="inanevinHyperlink" layoutX="298.0" layoutY="532.0" text="www.inanevin.com" textAlignment="RIGHT" underline="true" />
+            <CheckBox id="chiptuneCheckBox" layoutX="14.0" layoutY="515.0" mnemonicParsing="false" text="Chiptune Launcher Mode" textFill="#b28484">
                <font>
                   <Font size="9.0" />
                </font>
