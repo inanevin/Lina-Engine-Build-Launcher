@@ -406,7 +406,7 @@ public class Main extends Application
 
 
         //--------------------------------------------------------------------
-        // CHECK IF BUILD DIRECTORY IS VALID
+        // CHECK IF BUILD FILE IS VALID
         //--------------------------------------------------------------------
 
         if (!new File(buildField.getText()).exists())
@@ -454,6 +454,10 @@ public class Main extends Application
             }
 
         }
+
+        //--------------------------------------------------------------------
+        // CHECK IF BUILD DIRECTORY IS VALID
+        //--------------------------------------------------------------------
 
         String isBuildDirectoryValid = IsBuildDirectoryValid();
         if (!isBuildDirectoryValid.equals(""))
@@ -532,12 +536,12 @@ public class Main extends Application
 
         }
 
+        // Set flag
         runBuildCommandAfter = buildAsWell;
+
         // Concat the command for generating project files.
         String projectFileGenerateCommand = "cmake " + optionsString + generatorString + " " + sourceField.getText();
         ShellCommand(projectFileGenerateCommand, buildField.getText(), true);
-
-
     }
 
 
@@ -567,29 +571,28 @@ public class Main extends Application
             processBuilder.directory(new File(dir));
         }
 
-        System.out.println(command);
 
+        //--------------------------------------------------------------------
+        // ERROR FILE
+        //--------------------------------------------------------------------
         File errFile = new File(errorLogFile);
         processBuilder.redirectError(errFile);
 
 
         if (isLongTask)
         {
+
+            //--------------------------------------------------------------------
+            // CREATE PROGRESS FORM FOR THE PROCESS
+            //--------------------------------------------------------------------
             ProgressForm progressForm = new ProgressForm();
             progressForm.activate();
             currentProgressForm = progressForm;
 
-           /* currentProgressForm.GetTextArea().textProperty().addListener(new ChangeListener<String>()
-            {
-                @Override
-                public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
-
-                }
-            });*/
-
+            //--------------------------------------------------------------------
+            // ASSIGN PROCESS TO TASK & RUN THREAD WITH IT
+            //--------------------------------------------------------------------
             Process process = null;
-            // In real life this task would do something useful and return
-            // some meaningful result:
             Task<Void> task = new Task<Void>()
             {
                 @Override
@@ -699,64 +702,72 @@ public class Main extends Application
 
     void ShowExceptionDialog(Exception e, String contentMsg)
     {
+        //--------------------------------------------------------------------
+        // Create an alert with a text area in it to show an exception.
+        //--------------------------------------------------------------------
+
+        // Create alert
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Exception Occured!");
         alert.setHeaderText(null);
         alert.setContentText(contentMsg);
 
-
+        // Get exception data.
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);
         e.printStackTrace(pw);
         String exceptionText = sw.toString();
 
+        // Create label & text area.
         Label label = new Label("The exception stacktrace was:");
-
         TextArea textArea = new TextArea(exceptionText);
         textArea.setEditable(false);
         textArea.setWrapText(true);
-
-
         textArea.setMaxWidth(Double.MAX_VALUE);
         textArea.setMaxHeight(Double.MAX_VALUE);
+
+        // Create grid pane & assign.
         GridPane.setVgrow(textArea, Priority.ALWAYS);
         GridPane.setHgrow(textArea, Priority.ALWAYS);
-
         GridPane expContent = new GridPane();
         expContent.setMaxWidth(Double.MAX_VALUE);
         expContent.add(label, 0, 0);
         expContent.add(textArea, 0, 1);
 
+        // Show alert.
         alert.getDialogPane().setContent(expContent);
         alert.showAndWait();
     }
 
     void ShowExceptionDialog(String err, String contentMsg)
     {
+        //--------------------------------------------------------------------
+        // Create an alert with a text area in it to show an exception.
+        //--------------------------------------------------------------------
+
+        // Create alert
         Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Error Occured!");
+        alert.setTitle("Exception Occured!");
         alert.setHeaderText(null);
         alert.setContentText(contentMsg);
 
-
-        String exceptionText = err;
-
-        Label label = new Label("The error log was:");
-
-        TextArea textArea = new TextArea(exceptionText);
+        // Create label & text area.
+        Label label = new Label("The error  was:");
+        TextArea textArea = new TextArea(err);
         textArea.setEditable(false);
         textArea.setWrapText(true);
-
         textArea.setMaxWidth(Double.MAX_VALUE);
         textArea.setMaxHeight(Double.MAX_VALUE);
+
+        // Create grid pane & assign.
         GridPane.setVgrow(textArea, Priority.ALWAYS);
         GridPane.setHgrow(textArea, Priority.ALWAYS);
-
         GridPane expContent = new GridPane();
         expContent.setMaxWidth(Double.MAX_VALUE);
         expContent.add(label, 0, 0);
         expContent.add(textArea, 0, 1);
 
+        // Show alert.
         alert.getDialogPane().setContent(expContent);
         alert.showAndWait();
     }
@@ -774,29 +785,23 @@ public class Main extends Application
 
     void ShellCommandTask(ProcessBuilder processBuilder)
     {
-        // Run
+        //----------------------------------------------------------------------------
+        // Runs a process based on the builder. This is used for mkdir & md commands.
+        //----------------------------------------------------------------------------
+
         try
         {
+            // Start process.
             Process process = processBuilder.start();
-
-            BufferedReader reader =
-                    new BufferedReader(new InputStreamReader(process.getInputStream()));
-
-
-            String line;
-
-            while ((line = reader.readLine()) != null)
-            {
-                System.out.println(line);
-            }
-
             int exitCode = process.waitFor();
 
+            // Process error
             if (exitCode == 1)
             {
                 // Get buffer & read.
                 BufferedReader errReader = new BufferedReader(new FileReader(errorLogFile));
 
+                // Show error as alert.
                 String errLine = "";
                 String allLines = "";
 
@@ -820,46 +825,24 @@ public class Main extends Application
 
     void ShellCommandTask(ProcessBuilder processBuilder, ProgressForm progressForm)
     {
-        // Run
+        //-----------------------------------------------------------------------------------
+        // Runs a process based on the builder. This is used in project generation & build commands.
+        //-----------------------------------------------------------------------------------
         try
         {
+            // Start process
             Process process = processBuilder.start();
 
-            BufferedReader reader =
-                    new BufferedReader(new InputStreamReader(process.getInputStream()));
-
+            // Redirect streams to gobblers.
             StreamGobbler errorGobbler = new StreamGobbler(process.getErrorStream(), this, progressForm);
-
-
             StreamGobbler outputGobbler = new StreamGobbler(process.getInputStream(), this, progressForm);
 
-
+            // Start gobblers.
             outputGobbler.start();
             errorGobbler.start();
 
-            String line;
-            String temp;
-
-            String appended = "";
-
-           /* while ((line = reader.readLine()) != null)
-            {
-                progressForm.UpdateInputFeed(line);
-
-                Platform.runLater(new Runnable()
-                {
-                    @Override
-                    public void run() {
-                        UpdateTextArea();
-                    }
-                });
-
-                System.out.println(line);
-            }*/
-
-
+            // Check error.
             int exitCode = process.waitFor();
-
             if (exitCode != 0)
             {
                 File errFile = new File(errorLogFile);
@@ -868,6 +851,7 @@ public class Main extends Application
                 BufferedReader errReader = new BufferedReader(new FileReader(errFile));
                 String errLine = "";
 
+                // Update feed if error is present.
                 while ((errLine = errReader.readLine()) != null)
                 {
                     progressForm.UpdateInputFeed(errLine);
@@ -880,6 +864,7 @@ public class Main extends Application
                     });
                 }
 
+                // Show error label
                 Platform.runLater(new Runnable()
                 {
                     @Override
@@ -891,6 +876,7 @@ public class Main extends Application
             }
             else
             {
+                // Show success label.
                 Platform.runLater(new Runnable()
                 {
                     @Override
@@ -915,22 +901,16 @@ public class Main extends Application
     {
         currentProgressForm.GetTextArea().setText(currentProgressForm.GetInputFeed());
         currentProgressForm.GetTextArea().setScrollTop(Double.MAX_VALUE);
-        ///currentProgressForm.SetInputFeed("");
     }
 
     void ShowErrorOnProgress()
     {
-
-
         currentProgressForm.getInfoLabel().setVisible(true);
         currentProgressForm.getProgressBar().setVisible(false);
         currentProgressForm.getProgressIndicator().setVisible(false);
         currentProgressForm.getQuitButton().setVisible(true);
         currentProgressForm.getInfoLabel().setText("Error on Progress");
         currentProgressForm.getInfoLabel().setTextFill(Color.web("#ff0000"));
-
-
-
     }
 
     void ShowSuccessOnProgress()
@@ -949,6 +929,9 @@ public class Main extends Application
     }
     void ProgressCommandSuccessful()
     {
+        //----------------------------------------------------------------------------
+        // Generate & run build command if requested.
+        //----------------------------------------------------------------------------
         if(runBuildCommandAfter)
         {
             runBuildCommandAfter = false;
