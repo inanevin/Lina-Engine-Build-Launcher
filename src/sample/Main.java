@@ -16,9 +16,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
@@ -91,7 +89,9 @@ public class Main extends Application
     private Button generateAndBuildButton;
     private Button locateSourceButton;
     private Button locateBuildButton;
-
+    private Stage mainStage;
+    private AnchorPane rootNode;
+    private CopyTask copyTask;
     private static Pair<String, Object> pair(String name, Object value) {
         return new Pair<>(name, value);
     }
@@ -106,7 +106,7 @@ public class Main extends Application
 
     String generators[] =
             {
-                    "Visual Studio 15 201sd7",
+                    "Visual Studio 15 2017",
                     "Visual Studio 15 2017 ARM",
                     "Visual Studio 15 2017 Win64",
                     "Visual Studio 14 2015",
@@ -169,7 +169,10 @@ public class Main extends Application
         // ROOT SETTINGS
         //--------------------------------------------------------------------
 
+        mainStage = primaryStage;
         Parent root = FXMLLoader.load(getClass().getResource("sample.fxml"));
+        rootNode = (AnchorPane)root;
+
         root.setOnMousePressed(new EventHandler<MouseEvent>()
         {
             @Override
@@ -186,6 +189,7 @@ public class Main extends Application
                 primaryStage.setY(event.getScreenY() - sceneYOffset);
             }
         });
+
 
 
         Scene scene = new Scene(root, 1024, 576);
@@ -442,12 +446,12 @@ public class Main extends Application
 
                 if (isWindows)
                 {
-                    ShellCommand("md " + "\"" + buildField.getText() + "\"", "");
+                    ShellCommand("md " + "\"" + buildField.getText() + "\"", "", false);
 
                 }
                 else
                 {
-                    ShellCommand("mkdir " + "\"" + buildField.getText() + "\"", "");
+                    ShellCommand("mkdir " + "\"" + buildField.getText() + "\"", "", false);
                 }
 
             }
@@ -534,14 +538,14 @@ public class Main extends Application
         // Concat the command for generating project files.
         String projectFileGenerateCommand = "cmake " + optionsString + generatorString + " " + sourceField.getText();
 
-        ShellCommand(projectFileGenerateCommand, buildField.getText());
+        ShellCommand(projectFileGenerateCommand, buildField.getText(), true);
         if (buildAsWell)
         {
 
         }
     }
 
-    void ShellCommand(String command, String dir)
+    void ShellCommand(String command, String dir, boolean isLongTask)
     {
         //--------------------------------------------------------------------
         // EXECUTE COMMAND
@@ -565,70 +569,42 @@ public class Main extends Application
 
         File errFile = new File(errorLogFile);
         processBuilder.redirectError(errFile);
-        // Run
-        try
+
+
+        if(isLongTask)
         {
+            ProgressForm pForm = new ProgressForm();
 
+            // In real life this task would do something useful and return
+            // some meaningful result:
+            Task<Void> task = new Task<Void>() {
+                @Override
+                public Void call() throws InterruptedException {
 
-            Process process = processBuilder.start();
+                    ShellCommandTask(processBuilder);
+                    return null ;
+                }
+            };
 
-            BufferedReader reader =
-                    new BufferedReader(new InputStreamReader(process.getInputStream()));
-
-
-           /* ProgressForm pForm = new ProgressForm();
-
-
-            CommandTask task = new CommandTask();
-
+            // binds progress of progress bars to progress of task:
             pForm.activateProgressBar(task);
+
+            // in real life this method would get the result of the task
+            // and update the UI based on its value:
+            task.setOnSucceeded(event -> {
+                pForm.getDialogStage().close();
+                //startButton.setDisable(false);
+            });
+
+            //startButton.setDisable(true);
             pForm.getDialogStage().show();
 
-
-            //Thread thread = new Thread(task);
-            //thread.start();
-
-
-            String line;
-            int lineSize = (int) reader.lines().count();
-            int lineCounter = 0;
-*/
-            String line;
-            while ((line = reader.readLine()) != null)
-            {
-                //task.m_Progress = lineCounter;
-                //lineCounter++;
-                System.out.println(line);
-            }
-
-            int exitCode = process.waitFor();
-
-            if(exitCode == 1)
-            {
-                // Get buffer & read.
-                BufferedReader errReader = new BufferedReader(new FileReader(errFile));
-                String errLine = "";
-
-                String allLines = "";
-
-                while((errLine = errReader.readLine()) != null)
-                {
-                    allLines += errLine + System.lineSeparator();
-                }
-
-                ShowExceptionDialog(allLines, "Error while generating project files!");
-            }
-            System.out.println("\nExited with error code : " + exitCode);
-
+            Thread thread = new Thread(task);
+            thread.start();
         }
-        catch (IOException e)
-        {
-            ShowExceptionDialog(e, "IO Exception!");
-        }
-        catch (InterruptedException e)
-        {
-            ShowExceptionDialog(e, "Interrupted Exception!");
-        }
+        else
+            ShellCommandTask(processBuilder);
+
 
 
     }
@@ -755,7 +731,6 @@ public class Main extends Application
         alert.showAndWait();
     }
 
-
     void ShowExceptionDialog(String err, String contentMsg)
     {
         Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -794,6 +769,60 @@ public class Main extends Application
     public static void OptionTableItemEdited(int itemIndex, String value)
     {
         buildOptionList.get(itemIndex).setParticularValue(value);
+    }
+
+    void ShellCommandTask(ProcessBuilder processBuilder)
+    {
+        // Run
+        try
+        {
+            Process process = processBuilder.start();
+
+            BufferedReader reader =
+                    new BufferedReader(new InputStreamReader(process.getInputStream()));
+
+
+            String line;
+            //int lineSize = (int) reader.lines().count();
+            //int lineCounter = 0;
+
+            while ((line = reader.readLine()) != null)
+            {
+                //lineCounter++;
+                System.out.println(line);
+                //updateProgress(lineCounter, 100);
+            }
+
+            //updateProgress(lineSize, lineSize);
+
+            int exitCode = process.waitFor();
+
+                    /*if(exitCode == 1)
+                    {
+                        // Get buffer & read.
+                        BufferedReader errReader = new BufferedReader(new FileReader(errFile));
+                        String errLine = "";
+
+                        String allLines = "";
+
+                        while((errLine = errReader.readLine()) != null)
+                        {
+                            allLines += errLine + System.lineSeparator();
+                        }
+
+                        ShowExceptionDialog(allLines, "Error while generating project files!");
+                    }*/
+            System.out.println("\nExited with error code : " + exitCode);
+
+        }
+        catch (IOException e)
+        {
+            ShowExceptionDialog(e, "IO Exception!");
+        }
+        catch (InterruptedException e)
+        {
+            ShowExceptionDialog(e, "Interrupted Exception!");
+        }
     }
 
     public static void main(String[] args) {

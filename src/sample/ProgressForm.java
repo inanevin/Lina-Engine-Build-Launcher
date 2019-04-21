@@ -24,13 +24,13 @@ public class ProgressForm {
 
         // PROGRESS BAR
         final Label label = new Label();
-        label.setText("alerto");
+        label.setText("Working on...");
 
         pb.setProgress(-1F);
         pin.setProgress(-1F);
 
         final HBox hb = new HBox();
-        hb.setSpacing(5);
+        hb.setSpacing(50);
         hb.setAlignment(Pos.CENTER);
         hb.getChildren().addAll(pb, pin);
 
