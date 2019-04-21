@@ -451,7 +451,7 @@ public class Main extends Application
 
         // Concat the command for generating project files.
         String projectFileGenerateCommand = "cmake " + optionsString + generatorString + " " + sourceField.getText();
-        System.out.println(projectFileGenerateCommand);
+
 
         if (buildAsWell)
         {
