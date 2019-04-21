@@ -20,9 +20,12 @@ import javafx.stage.StageStyle;
 import javafx.event.ActionEvent;
 import javafx.util.Callback;
 import javafx.util.Pair;
+import jdk.nashorn.tools.Shell;
 
+import javax.rmi.CORBA.Util;
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.Executors;
 
 
 class EnableDynamicLogo extends TimerTask
@@ -66,6 +69,7 @@ class DisableDynamicLogo extends TimerTask
 public class Main extends Application
 {
 
+
     private double sceneXOffset;
     private double sceneYOffset;
     private int logoChangeRate = 5;
@@ -86,10 +90,10 @@ public class Main extends Application
         return new Pair<>(name, value);
     }
 
-    static  ObservableList<Pair<String, Object>> data = FXCollections.observableArrayList(
+    static ObservableList<Pair<String, Object>> data = FXCollections.observableArrayList(
             pair("CMAKE_CONFIGURATION_TYPES", "Debug;Release;MinSizeRel;RelWithDebInfo;"),
             pair("LINA_BUILD_SANDBOX", false),
-            pair("LINA_ENABLE_LOGGING",  true)
+            pair("LINA_ENABLE_LOGGING", true)
     );
 
     static ArrayList<BuildOption> buildOptionList = new ArrayList<>();
@@ -150,6 +154,10 @@ public class Main extends Application
     @Override
     public void start(Stage primaryStage) throws Exception {
 
+        //--------------------------------------------------------------------
+        // USERDATA
+        //--------------------------------------------------------------------
+        Utility.ReadUserData();
 
         //--------------------------------------------------------------------
         // ROOT SETTINGS
@@ -229,6 +237,8 @@ public class Main extends Application
                 if (selectedDirectory != null)
                 {
                     sourceField.setText(selectedDirectory.getAbsolutePath());
+                    Utility.userData.setLastSourceDir(selectedDirectory.getAbsolutePath());
+                    Utility.WriteUserData();
                 }
             }
         });
@@ -247,6 +257,8 @@ public class Main extends Application
                 if (selectedDirectory != null)
                 {
                     buildField.setText(selectedDirectory.getAbsolutePath());
+                    Utility.userData.setLastSourceDir(selectedDirectory.getAbsolutePath());
+                    Utility.WriteUserData();
                 }
             }
         });
@@ -277,6 +289,17 @@ public class Main extends Application
         });
 
         //--------------------------------------------------------------------
+        // TEXTFIELD SETTINGS
+        //--------------------------------------------------------------------
+        if(Utility.userData == null) Utility.userData = new UserData();
+
+        String lastSourceDirectory = Utility.userData.getLastSourceDir();
+        String lastBuildDirectory = Utility.userData.getLastBuildDir();
+
+        sourceField.setText(lastSourceDirectory);
+        buildField.setText(lastBuildDirectory);
+
+        //--------------------------------------------------------------------
         // OPTION TABLE VIEW SETTINGS
         //--------------------------------------------------------------------
 
@@ -284,11 +307,11 @@ public class Main extends Application
         // Set data & build option list according to the data.
         optionsTable.getItems().setAll(data);
 
-        Iterator<Pair<String,Object>> it = data.iterator();
+        Iterator<Pair<String, Object>> it = data.iterator();
 
-        while(it.hasNext())
+        while (it.hasNext())
         {
-            Pair<String,Object> pair = it.next();
+            Pair<String, Object> pair = it.next();
             buildOptionList.add(new BuildOption(pair.getKey(), pair.getValue()));
         }
 
@@ -302,8 +325,9 @@ public class Main extends Application
         nameColumn.setCellValueFactory(new PairKeyFactory());
         valueColumn.setCellValueFactory(new PairValueFactory());
 
-       optionsTable.getColumns().setAll(nameColumn, valueColumn);
-        valueColumn.setCellFactory(new Callback<TableColumn<Pair<String, Object>, Object>, TableCell<Pair<String, Object>, Object>>() {
+        optionsTable.getColumns().setAll(nameColumn, valueColumn);
+        valueColumn.setCellFactory(new Callback<TableColumn<Pair<String, Object>, Object>, TableCell<Pair<String, Object>, Object>>()
+        {
             @Override
             public TableCell<Pair<String, Object>, Object> call(TableColumn<Pair<String, Object>, Object> column) {
                 return new PairValueCell();
@@ -452,11 +476,79 @@ public class Main extends Application
         // Concat the command for generating project files.
         String projectFileGenerateCommand = "cmake " + optionsString + generatorString + " " + sourceField.getText();
 
-
+        ShellCommand(projectFileGenerateCommand);
         if (buildAsWell)
         {
 
         }
+    }
+
+    void ShellCommand(String command)
+    {
+      /*  boolean isWindows = System.getProperty("os.name")
+                .toLowerCase().startsWith("windows");
+
+        ProcessBuilder builder = new ProcessBuilder();
+        if (isWindows)
+        {
+            builder.command("cmd.exe", command, "dir");
+        }
+        else
+        {
+            builder.command("sh", "-c", "ls");
+        }
+        builder.directory(new File(buildField.getText()));
+        try
+        {
+            Process process = builder.start();
+            StreamGobbler streamGobbler =
+                    new StreamGobbler(process.getInputStream(), System.out::println);
+            Executors.newSingleThreadExecutor().submit(streamGobbler);
+            int exitCode = process.waitFor();
+            assert exitCode == 0;
+        }
+        catch (IOException e)
+        {
+
+        }
+        catch (InterruptedException e)
+        {
+
+        }*/
+
+        try {
+            String s = null;
+
+            // run the Unix "ps -ef" command
+            // using the Runtime exec method:
+            Process p = Runtime.getRuntime().exec(command);
+
+            BufferedReader stdInput = new BufferedReader(new
+                    InputStreamReader(p.getInputStream()));
+
+            BufferedReader stdError = new BufferedReader(new
+                    InputStreamReader(p.getErrorStream()));
+
+            // read the output from the command
+            System.out.println("Here is the standard output of the command:\n");
+            while ((s = stdInput.readLine()) != null) {
+                System.out.println(s);
+            }
+
+            // read any errors from the attempted command
+            System.out.println("Here is the standard error of the command (if any):\n");
+            while ((s = stdError.readLine()) != null) {
+                System.out.println(s);
+            }
+
+            System.exit(0);
+        }
+        catch (IOException e) {
+            System.out.println("exception happened - here's what I know: ");
+            e.printStackTrace();
+            System.exit(-1);
+        }
+
     }
 
     String IsBuildDirectoryValid() {
@@ -555,5 +647,6 @@ public class Main extends Application
     public static void main(String[] args) {
         launch(args);
     }
+
 }
 
