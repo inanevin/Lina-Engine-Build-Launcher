@@ -429,7 +429,19 @@ public class Main extends Application
             }
             else if (result.get() == continueButton)
             {
-                ShellCommand("md " + "\"" +buildField.getText() + "\"", "");
+                boolean isWindows = System.getProperty("os.name")
+                        .toLowerCase().startsWith("windows");
+
+                if (isWindows)
+                {
+                    ShellCommand("md " + "\"" +buildField.getText() + "\"", "");
+
+                }
+                else
+                {
+                    ShellCommand("mkdir " + "\"" + buildField.getText() + "\"", "");
+                }
+
             }
 
         }
@@ -529,25 +541,19 @@ public class Main extends Application
         boolean isWindows = System.getProperty("os.name")
                 .toLowerCase().startsWith("windows");
 
-        /*if (isWindows) {
-            processBuilder.command("cmd.exe", "/" + command + "dir " + buildField.getText());
-        } else {
-            processBuilder.command("bash -" + command + " ls " + buildField.getText());
-        }*/
-
         if (isWindows)
         {
             processBuilder.command("cmd.exe", "/c", command);
-            if (!dir.equals(""))
-            {
-                processBuilder.directory(new File(dir));
-            }
+
         }
         else
         {
-            processBuilder.command("bash -" + command + " ls " + buildField.getText());
+            processBuilder.command("bash", "-c", command );
         }
-
+        if (!dir.equals(""))
+        {
+            processBuilder.directory(new File(dir));
+        }
         try
         {
 
