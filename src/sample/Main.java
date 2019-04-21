@@ -82,9 +82,17 @@ public class Main extends Application
     private Button locateSourceButton;
     private Button locateBuildButton;
 
-    private Pair<String, Object> pair(String name, Object value) {
+    private static Pair<String, Object> pair(String name, Object value) {
         return new Pair<>(name, value);
     }
+
+    static  ObservableList<Pair<String, Object>> data = FXCollections.observableArrayList(
+            pair("CMAKE_CONFIGURATION_TYPES", "Debug;Release;MinSizeRel;RelWithDebInfo;"),
+            pair("LINA_BUILD_SANDBOX", false),
+            pair("LINA_ENABLE_LOGGING",  true)
+    );
+
+    static ArrayList<BuildOption> buildOptionList = new ArrayList<>();
 
     String generators[] =
             {
@@ -272,14 +280,17 @@ public class Main extends Application
         // OPTION TABLE VIEW SETTINGS
         //--------------------------------------------------------------------
 
-        // Create & set data.
-        ObservableList<Pair<String, Object>> data = FXCollections.observableArrayList(
-        pair("CMAKE_CONFIGURATION_TYPES", "Debug;Release;MinSizeRel;RelWithDebInfo;"),
-                pair("LINA_BUILD_SANDBOX", false),
-                pair("LINA_ENABLE_LOGGING",  true)
-        );
 
+        // Set data & build option list according to the data.
         optionsTable.getItems().setAll(data);
+
+        Iterator<Pair<String,Object>> it = data.iterator();
+
+        while(it.hasNext())
+        {
+            Pair<String,Object> pair = it.next();
+            buildOptionList.add(new BuildOption(pair.getKey(), pair.getValue()));
+        }
 
         // Set columns
         TableColumn<Pair<String, Object>, String> nameColumn = new TableColumn<>("OPTION");
@@ -401,8 +412,8 @@ public class Main extends Application
         String optionsString = "";
 
         // Get item list from the options table & an iterator for it.
-       /* ObservableList<BuildOption> items = optionsTable.getItems();
-        Iterator<BuildOption> it = items.iterator();
+
+        Iterator<BuildOption> it = buildOptionList.iterator();
 
         // Iterate all the items.
         while (it.hasNext())
@@ -441,7 +452,7 @@ public class Main extends Application
         // Concat the command for generating project files.
         String projectFileGenerateCommand = "cmake " + optionsString + generatorString + " " + sourceField.getText();
         System.out.println(projectFileGenerateCommand);
-*/
+
         if (buildAsWell)
         {
 
@@ -533,12 +544,12 @@ public class Main extends Application
 
     public static void OptionTableItemEdited(int itemIndex, boolean value)
     {
-        System.out.println("Index: " + itemIndex + "Value: " + Boolean.toString(value));
+        buildOptionList.get(itemIndex).setParticularValue(value);
     }
 
     public static void OptionTableItemEdited(int itemIndex, String value)
     {
-        System.out.println("Index: " + itemIndex + "Value: " + value);
+        buildOptionList.get(itemIndex).setParticularValue(value);
     }
 
     public static void main(String[] args) {
