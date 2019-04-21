@@ -20,7 +20,7 @@
 
 <AnchorPane prefHeight="576.0" prefWidth="1024.0" style="-fx-background-color: linear-gradient(#200122, #200122,#3F0D12); -fx-background-radius: 3 3 3 3;" BorderPane.alignment="CENTER" xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1">
    <children>
-      <Pane prefHeight="576.0" prefWidth="427.0" style="-fx-background-color: linear-gradient(#000000,#000000,#3F0D12); -fx-background-radius: 3 0 0 3;">
+      <Pane prefHeight="576.0" prefWidth="425.0" style="-fx-background-color: linear-gradient(#000000,#000000,#3F0D12); -fx-background-radius: 3 0 0 3;">
          <children>
             <ImageView id="logoStatic" blendMode="SRC_ATOP" fitHeight="149.0" fitWidth="113.0" layoutX="160.0" layoutY="34.0" mouseTransparent="true" pickOnBounds="true" preserveRatio="true">
                <image>
@@ -42,15 +42,15 @@
                <font>
                   <Font size="9.0" />
                </font></Label>
-            <Label layoutX="305.0" layoutY="526.0" text="Copyright (C) 2019 Inan Evin" textFill="#b28484">
+            <Label layoutX="289.0" layoutY="526.0" text="Copyright (C) 2019 Inan Evin" textFill="#b28484">
                <font>
                   <Font size="9.0" />
                </font></Label>
-            <Label layoutX="15.0" layoutY="286.0" prefHeight="53.0" prefWidth="397.0" text="Use this launcher to create a new empty sandbox project based on Lina Engine source. You will be able to compile Lina Engine source and use it according to your needs." textAlignment="CENTER" textFill="#756583" wrapText="true">
+            <Label layoutX="22.0" layoutY="288.0" prefHeight="53.0" prefWidth="381.0" text="Use this launcher to create a new empty sandbox project based on Lina Engine source. You will be able to compile Lina Engine source and use it according to your needs." textAlignment="CENTER" textFill="#756583" wrapText="true">
                <font>
                   <Font size="11.0" />
                </font></Label>
-            <Hyperlink id="githubHyperlink" layoutX="177.0" layoutY="467.0" text="Github Page" underline="true" />
+            <Hyperlink id="githubHyperlink" layoutX="176.0" layoutY="459.0" text="Github Page" underline="true" />
             <ImageView id="text_dynamic" blendMode="SRC_ATOP" fitHeight="98.0" fitWidth="297.0" layoutX="64.0" layoutY="208.0" mouseTransparent="true" pickOnBounds="true" preserveRatio="true">
                <image>
                   <Image url="@title_text_dynamic.gif" />
@@ -59,17 +59,17 @@
                   <Glow />
                </effect>
             </ImageView>
-            <Label layoutX="14.0" layoutY="352.0" prefHeight="53.0" prefWidth="397.0" text="This launcher uses CMake to handle the build process of project files for your desired IDE. Therefore CMake 3.6 or above is required to be installed on your machine." textAlignment="CENTER" textFill="#756583" wrapText="true">
+            <Label layoutX="22.0" layoutY="352.0" prefHeight="53.0" prefWidth="381.0" text="This launcher uses CMake to handle the build process of project files for your desired IDE. Therefore CMake 3.6 or above is required to be installed on your machine." textAlignment="CENTER" textFill="#756583" wrapText="true">
                <font>
                   <Font size="11.0" />
                </font>
             </Label>
-            <Label layoutX="64.0" layoutY="414.0" prefHeight="53.0" prefWidth="297.0" text="Please visit Lina Engine's Github page for more information." textAlignment="CENTER" textFill="#756583" wrapText="true">
+            <Label layoutX="65.0" layoutY="419.0" prefHeight="33.0" prefWidth="297.0" text="Please visit Lina Engine's Github page for more information." textAlignment="CENTER" textFill="#756583" wrapText="true">
                <font>
                   <Font size="11.0" />
                </font>
             </Label>
-            <Hyperlink id="inanevinHyperlink" layoutX="308.0" layoutY="547.0" text="www.inanevin.com" underline="true" />
+            <Hyperlink id="inanevinHyperlink" layoutX="296.0" layoutY="547.0" text="www.inanevin.com" textAlignment="RIGHT" underline="true" />
             <CheckBox id="chiptuneCheckBox" layoutX="21.0" layoutY="526.0" mnemonicParsing="false" text="Chiptune Launcher Mode" textFill="#b28484">
                <font>
                   <Font size="9.0" />
