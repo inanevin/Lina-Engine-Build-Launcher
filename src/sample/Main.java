@@ -92,6 +92,7 @@ public class Main extends Application
     private Stage mainStage;
     private AnchorPane rootNode;
     private CopyTask copyTask;
+
     private static Pair<String, Object> pair(String name, Object value) {
         return new Pair<>(name, value);
     }
@@ -106,7 +107,7 @@ public class Main extends Application
 
     String generators[] =
             {
-                    "Visual Studio 15 2017",
+                    "Visual Studio s15 2017",
                     "Visual Studio 15 2017 ARM",
                     "Visual Studio 15 2017 Win64",
                     "Visual Studio 14 2015",
@@ -171,7 +172,7 @@ public class Main extends Application
 
         mainStage = primaryStage;
         Parent root = FXMLLoader.load(getClass().getResource("sample.fxml"));
-        rootNode = (AnchorPane)root;
+        rootNode = (AnchorPane) root;
 
         root.setOnMousePressed(new EventHandler<MouseEvent>()
         {
@@ -189,7 +190,6 @@ public class Main extends Application
                 primaryStage.setY(event.getScreenY() - sceneYOffset);
             }
         });
-
 
 
         Scene scene = new Scene(root, 1024, 576);
@@ -390,7 +390,7 @@ public class Main extends Application
         String isSourceDirectoryValid = IsSourceDirectoryValid();
         if (!isSourceDirectoryValid.equals(""))
         {
-            if(isSourceDirectoryValid.equals("-1")) return;
+            if (isSourceDirectoryValid.equals("-1")) return;
 
             // Create alert
             Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -559,11 +559,17 @@ public class Main extends Application
 
         // Feed command & dir.
         if (isWindows)
+        {
             processBuilder.command("cmd.exe", "/c", command);
+        }
         else
+        {
             processBuilder.command("bash", "-c", command);
+        }
         if (!dir.equals(""))
+        {
             processBuilder.directory(new File(dir));
+        }
 
         System.out.println(command);
 
@@ -571,40 +577,17 @@ public class Main extends Application
         processBuilder.redirectError(errFile);
 
 
-        if(isLongTask)
+        if (isLongTask)
         {
             ProgressForm pForm = new ProgressForm();
+            pForm.activate();
+            ShellCommandTask(processBuilder, pForm);
 
-            // In real life this task would do something useful and return
-            // some meaningful result:
-            Task<Void> task = new Task<Void>() {
-                @Override
-                public Void call() throws InterruptedException {
-
-                    ShellCommandTask(processBuilder);
-                    return null ;
-                }
-            };
-
-            // binds progress of progress bars to progress of task:
-            pForm.activateProgressBar(task);
-
-            // in real life this method would get the result of the task
-            // and update the UI based on its value:
-            task.setOnSucceeded(event -> {
-                pForm.getDialogStage().close();
-                //startButton.setDisable(false);
-            });
-
-            //startButton.setDisable(true);
-            pForm.getDialogStage().show();
-
-            Thread thread = new Thread(task);
-            thread.start();
         }
         else
+        {
             ShellCommandTask(processBuilder);
-
+        }
 
 
     }
@@ -812,6 +795,69 @@ public class Main extends Application
 
                         ShowExceptionDialog(allLines, "Error while generating project files!");
                     }*/
+            System.out.println("\nExited with error code : " + exitCode);
+
+        }
+        catch (IOException e)
+        {
+            ShowExceptionDialog(e, "IO Exception!");
+        }
+        catch (InterruptedException e)
+        {
+            ShowExceptionDialog(e, "Interrupted Exception!");
+        }
+    }
+
+    void ShellCommandTask(ProcessBuilder processBuilder, ProgressForm progressForm)
+    {
+        // Run
+        try
+        {
+            Process process = processBuilder.start();
+
+            BufferedReader reader =
+                    new BufferedReader(new InputStreamReader(process.getInputStream()));
+
+
+            String line;
+            String temp;
+            //int lineSize = (int) reader.lines().count();
+            //int lineCounter = 0;
+
+            while ((line = reader.readLine()) != null)
+            {
+                temp = line;
+                //lineCounter++;
+                progressForm.AddInputToFeed(temp);
+                System.out.println(line);
+                //updateProgress(lineCounter, 100);
+            }
+
+            //updateProgress(lineSize, lineSize);
+
+            int exitCode = process.waitFor();
+
+            if (exitCode != 0)
+            {
+                File errFile = new File(errorLogFile);
+
+
+                // Get buffer & read.
+                BufferedReader errReader = new BufferedReader(new FileReader(errFile));
+                String errLine = "";
+
+                String allLines = "";
+
+                while ((errLine = errReader.readLine()) != null)
+                {
+                    allLines += errLine + System.lineSeparator();
+                    //progressForm.AddInputToFeed(errLine);
+                }
+
+                progressForm.ShowError("Error with exit code ");
+                progressForm.AddInputToFeed(allLines);
+                //ShowExceptionDialog(allLines, "Error while generating project files!");
+            }
             System.out.println("\nExited with error code : " + exitCode);
 
         }
