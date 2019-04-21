@@ -84,7 +84,7 @@ public class Main extends Application
     private String sourceDirectoryIdentifier = "#linaenginebuildlauncherentrypointv100";
 
 
-
+    Timer logoTimer;
     private TextField sourceField, buildField;
     private ComboBox<String> generatorBox;
     private TableView<Pair<String, Object>> optionsTable = new TableView<>();
@@ -170,7 +170,7 @@ public class Main extends Application
 
         ImageView logoDynamic;
         ImageView logoStatic;
-        Timer logoTimer;
+
         Button generateButton;
         Button generateAndBuildButton;
         Button locateSourceButton;
@@ -210,7 +210,6 @@ public class Main extends Application
         logoDynamic = (ImageView) scene.lookup("#logoDynamic");
         logoStatic = (ImageView) scene.lookup("#logoStatic");
         logoChiptune = (ImageView)scene.lookup("#logoChiptune");
-
         generatorBox = (ComboBox<String>) scene.lookup("#generatorComboBox");
         optionsTable = (TableView) scene.lookup("#optionsTable");
         sourceField = (TextField) scene.lookup("#sourceField");
@@ -390,13 +389,19 @@ public class Main extends Application
                     chiptuneCheckbox.setText("Chiptune Launcher Mode: Music by MUZYKA CZLOWIEKA");
                     menuPlayer.play();
                     logoTimer.cancel();
+                    logoChiptune.setVisible(true);
+                    logoDynamic.setVisible(false);
+                    logoStatic.setVisible(false);
+                    System.out.println(logoChiptune.isVisible());
                 }
                 else
                 {
+                    menuPlayer.pause();
                     chiptuneCheckbox.setText("Chiptune Launcher Mode");
                     logoChiptune.setVisible(false);
                     logoDynamic.setVisible(false);
                     logoStatic.setVisible(true);
+                    logoTimer = new Timer(true);
                     logoTimer.scheduleAtFixedRate(new EnableDynamicLogo(logoStatic, logoDynamic, logoTimer), logoChangeRate * 1000, logoChangeRate * 1000);
                 }
             }
