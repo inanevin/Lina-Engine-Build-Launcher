@@ -8,4 +8,15 @@ This is a utility tool for generating project files from Lina Engine source code
 uses CMake as a build system. This tool simplifies the process of running CMake commands. You can use CMake from shell or CMake GUI to
 generate project files for Lina Engine and build them, or you can use this Launcher for a simplified interface.
 
+## Installation
 
+- Navigate to Releases tab and download the latest release binary as .jar file. Run the program directly within .jar file or via shell.
+
+## Usage
+
+![img](Docs/LauncherScreenshot.png)
+
+- Select the source directory. This is the directory of your Lina Engine source repo/clone/download.
+- Select the target directory (build directory) for the generated project files.
+- Select your generator & desired build options.
+- Hit Generate Project Files to generate the project files, or Generate and Build to generate and build the binaries afterwards.
