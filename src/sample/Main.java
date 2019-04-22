@@ -100,7 +100,7 @@ public class Main extends Application
 
     static ObservableList<Pair<String, Object>> data = FXCollections.observableArrayList(
             //pair("CMAKE_CONFIGURATION_TYPES", "Debug;Release;MinSizeRel;RelWithDebInfo;"),
-            pair("LINA_BUILD_SANDBOX", false),
+            pair("LINA_BUILD_SANDBOX", true),
             pair("LINA_ENABLE_LOGGING", true)
     );
 
