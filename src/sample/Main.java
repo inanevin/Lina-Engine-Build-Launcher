@@ -231,7 +231,6 @@ public class Main extends Application
         //--------------------------------------------------------------------
         Media menuMusic = new Media(getClass().getResource("chiptune.mp3").toString());
         MediaPlayer menuPlayer = new MediaPlayer(menuMusic);
-
         //--------------------------------------------------------------------
         // BUTTON CALLBACKS
         //--------------------------------------------------------------------
@@ -400,6 +399,7 @@ public class Main extends Application
                 if(newValue)
                 {
                     chiptuneCheckbox.setText("Chiptune Launcher Mode: Music by MUZYKA CZLOWIEKA");
+                    menuPlayer.setCycleCount(MediaPlayer.INDEFINITE);
                     menuPlayer.play();
                     logoTimer.cancel();
                     logoChiptune.setVisible(true);
