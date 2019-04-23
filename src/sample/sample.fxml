@@ -136,7 +136,7 @@
       <Group layoutX="421.0" layoutY="198.0">
          <children>
             <Label layoutY="14.0" prefHeight="41.0" prefWidth="389.0" style="-fx-background-color: linear-gradient(to right, #000000, #200122);" />
-            <Label layoutX="20.0" layoutY="22.0" text="Options">
+            <Label layoutX="31.0" layoutY="22.0" text="Options">
                <textFill>
                   <LinearGradient endX="1.0" endY="1.0">
                      <stops>
