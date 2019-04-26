@@ -10,6 +10,7 @@ generate project files for Lina Engine and build them, or you can use this Launc
 
 ## Installation
 
+-  You need to have JavaFX Runtime library installed on your computer & environment paths set for it. For more information visit [Java FX](https://openjfx.io/).
 - Navigate to Releases tab and download the latest release binary as .jar file. Run the program directly within .jar file or via shell.
 
 ## Usage
